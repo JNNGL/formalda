@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ru" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head(${#messages.msg('moderation.queue.title')})}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main id="main-content" class="page-shell page-shell-wide">
+    <div th:replace="~{fragments/flash :: flash}"></div>
+    <div class="admin-layout">
+        <aside class="admin-sidebar">
+            <p class="admin-sidebar-title" th:text="#{moderation.sidebar}">Модерация</p>
+            <nav th:attr="aria-label=#{moderation.navigation}"><a class="active" aria-current="page" th:href="@{/moderation/reports}" th:text="#{moderation.reports}">Жалобы</a><a th:href="@{/}" th:text="#{nav.forum}">На форум</a></nav>
+        </aside>
+        <section aria-labelledby="queue-heading">
+            <header class="page-header"><div><p class="eyebrow" th:text="#{moderation.eyebrow}">Рабочая очередь</p><h1 id="queue-heading" class="page-title-compact" th:text="#{moderation.queue.title}">Жалобы</h1><p class="lead" th:text="#{moderation.queue.subtitle}">Проверяйте контекст и фиксируйте причину каждого решения.</p></div></header>
+            <ol class="report-list" th:if="${reports != null and !reports.isEmpty()}">
+                <li class="report-row" th:each="report : ${reports.content}">
+                    <div>
+                        <div class="meta-list"><span class="badge" th:classappend="${report.status.name() == 'PENDING' ? 'badge-warning' : (report.status.name() == 'REJECTED' ? 'badge-muted' : 'badge-danger')}" th:text="${#messages.msg('report.status.' + #strings.toLowerCase(report.status))}">Статус</span><span th:text="${report.categoryName}">Категория</span><time th:datetime="${report.createdAt}" th:text="${#temporals.format(report.createdAt, 'dd.MM.yyyy HH:mm')}">Дата</time></div>
+                        <h3 style="margin-top: 10px"><a th:href="@{/moderation/reports/{id}(id=${report.id})}" th:text="${report.topicTitle}">Тема</a></h3>
+                        <p th:text="${#strings.abbreviate(report.reason, 240)}">Причина жалобы</p>
+                        <p class="small muted"><span th:text="#{report.from}">От:</span> <strong th:text="${report.reporterUsername}">user</strong> · <span th:text="#{report.against}">на:</span> <strong th:text="${report.postAuthorUsername}">author</strong></p>
+                    </div>
+                    <a class="button button-small button-yellow" th:href="@{/moderation/reports/{id}(id=${report.id})}" th:text="#{moderation.review}">Рассмотреть</a>
+                </li>
+            </ol>
+            <div class="empty-state" th:if="${reports == null or reports.isEmpty()}"><span class="empty-state-mark" aria-hidden="true">✓</span><h2 th:text="#{moderation.empty}">Очередь пуста</h2><p th:text="#{moderation.emptyHint}">Новых жалоб в назначенных категориях нет.</p></div>
+            <th:block th:with="baseUrl='/moderation/reports', querySuffix=''"><nav th:replace="~{fragments/pagination :: pagination(${reports}, ${baseUrl}, ${querySuffix})}"></nav></th:block>
+        </section>
+    </div>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

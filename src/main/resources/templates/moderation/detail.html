@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head(${#messages.msg('moderation.detail.title')})}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main id="main-content" class="page-shell page-shell-wide">
+    <div th:replace="~{fragments/flash :: flash}"></div>
+    <div class="admin-layout">
+        <aside class="admin-sidebar"><p class="admin-sidebar-title" th:text="#{moderation.sidebar}">Модерация</p><nav th:attr="aria-label=#{moderation.navigation}"><a class="active" aria-current="page" th:href="@{/moderation/reports}" th:text="#{moderation.reports}">Жалобы</a><a th:href="@{/}" th:text="#{nav.forum}">На форум</a></nav></aside>
+        <section aria-labelledby="report-heading">
+            <nav th:attr="aria-label=#{breadcrumbs.label}"><ol class="breadcrumbs"><li><a th:href="@{/moderation/reports}" th:text="#{moderation.reports}">Жалобы</a></li><li aria-current="page" th:text="${'#' + report.id}">#1</li></ol></nav>
+            <header class="page-header"><div><p class="eyebrow" th:text="#{moderation.detail.eyebrow}">Проверка жалобы</p><h1 id="report-heading" class="page-title-compact" th:text="#{moderation.detail.title(${report.id})}">Жалоба #1</h1><div class="meta-list"><span class="badge" th:text="${#messages.msg('report.status.' + #strings.toLowerCase(report.status))}">Статус</span><time th:datetime="${report.createdAt}" th:text="${#temporals.format(report.createdAt, 'dd.MM.yyyy HH:mm')}">Дата</time></div></div><a class="button" th:href="@{/posts/{id}(id=${report.postId})}" th:text="#{moderation.openContext}">Открыть контекст</a></header>
+            <div class="content-grid">
+                <div class="content-main stack">
+                    <section class="panel panel-yellow"><h2 th:text="#{report.reason}">Причина жалобы</h2><p style="white-space: pre-wrap" th:text="${report.reason}">Причина</p><div class="post-meta"><span th:text="#{report.from}">От:</span><strong th:text="${report.reporterUsername}">user</strong></div></section>
+                    <section class="panel"><h2 th:text="#{moderation.context}">Контекст</h2><dl class="definition-grid"><dt th:text="#{moderation.topic}">Тема</dt><dd><a th:href="@{/topics/{id}(id=${report.topicId})}" th:text="${report.topicTitle}">Тема</a></dd><dt th:text="#{moderation.category}">Категория</dt><dd th:text="${report.categoryName}">Категория</dd><dt th:text="#{moderation.author}">Автор публикации</dt><dd><a th:href="@{/users/{username}(username=${report.postAuthorUsername})}" th:text="${report.postAuthorUsername}">author</a></dd></dl></section>
+                    <section class="panel panel-mint" th:if="${report.status.name() != 'PENDING'}"><h2 th:text="#{moderation.decision}">Решение</h2><p th:text="${report.resolutionReason}">Причина решения</p><div class="post-meta"><span th:text="#{moderation.decidedBy}">Решил:</span><strong th:text="${report.resolvedByUsername}">moderator</strong><time th:if="${report.resolvedAt != null}" th:datetime="${report.resolvedAt}" th:text="${#temporals.format(report.resolvedAt, 'dd.MM.yyyy HH:mm')}">Дата</time></div></section>
+                </div>
+                <aside class="content-aside" th:if="${report.status.name() == 'PENDING'}">
+                    <form class="form-card" th:action="@{/moderation/reports/{id}(id=${report.id})}" th:object="${form}" method="post">
+                        <h2 th:text="#{moderation.makeDecision}">Принять решение</h2>
+                        <div th:replace="~{fragments/flash :: formErrors(${form})}"></div>
+                        <div class="stack">
+                            <div class="field"><label class="required" for="action" th:text="#{moderation.action}">Действие</label><select id="action" th:field="*{action}" required th:attr="aria-invalid=${#fields.hasErrors('action')},aria-describedby=${#fields.hasErrors('action') ? 'action-error' : null},aria-errormessage=${#fields.hasErrors('action') ? 'action-error' : null}" th:classappend="${#fields.hasErrors('action')} ? 'field-error-input'"><option value="" th:text="#{moderation.chooseAction}">Выберите действие</option><option value="REJECT" th:text="#{moderation.reject}">Отклонить жалобу</option><option value="HIDE" th:text="#{moderation.hide}">Скрыть публикацию</option><option value="BLOCK" th:text="#{moderation.block}">Скрыть и заблокировать автора</option></select><span id="action-error" class="field-error" th:if="${#fields.hasErrors('action')}" th:errors="*{action}">Ошибка</span></div>
+                            <div class="field"><label class="required" for="decision-reason" th:text="#{moderation.reason}">Обоснование</label><textarea id="decision-reason" th:field="*{reason}" required minlength="3" maxlength="1000" rows="5" th:attr="aria-invalid=${#fields.hasErrors('reason')},aria-describedby=${#fields.hasErrors('reason') ? 'decision-reason-error' : null},aria-errormessage=${#fields.hasErrors('reason') ? 'decision-reason-error' : null}" th:classappend="${#fields.hasErrors('reason')} ? 'field-error-input'"></textarea><span id="decision-reason-error" class="field-error" th:if="${#fields.hasErrors('reason')}" th:errors="*{reason}">Ошибка</span></div>
+                            <div class="field"><label for="blockDays" th:text="#{moderation.blockDays}">Срок блокировки, дней</label><input id="blockDays" type="number" th:field="*{blockDays}" min="1" max="3650" th:attr="aria-invalid=${#fields.hasErrors('blockDays')},aria-describedby=${#fields.hasErrors('blockDays') ? 'block-days-help block-days-error' : 'block-days-help'},aria-errormessage=${#fields.hasErrors('blockDays') ? 'block-days-error' : null}" th:classappend="${#fields.hasErrors('blockDays')} ? 'field-error-input'"><small id="block-days-help" class="field-help" th:text="#{moderation.blockDaysHelp}">Заполняется только при блокировке.</small><span id="block-days-error" class="field-error" th:if="${#fields.hasErrors('blockDays')}" th:errors="*{blockDays}">Ошибка</span></div>
+                            <button class="button button-coral" type="submit" th:text="#{moderation.submit}">Сохранить решение</button>
+                        </div>
+                    </form>
+                </aside>
+            </div>
+        </section>
+    </div>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

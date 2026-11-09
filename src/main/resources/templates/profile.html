@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ru" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head(${userProfile.username})}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main id="main-content" class="page-shell">
+    <div th:replace="~{fragments/flash :: flash}"></div>
+    <header class="profile-header">
+        <span class="avatar" aria-hidden="true" th:text="${#strings.substring(userProfile.username, 0, 1).toUpperCase()}">U</span>
+        <div>
+            <div class="meta-list">
+                <span class="badge badge-purple" th:each="role : ${userProfile.roles}"
+                      th:text="${#messages.msg('role.' + #strings.toLowerCase(role))}">Пользователь</span>
+                <span class="badge badge-danger" th:if="${userProfile.blocked}" th:text="#{profile.blocked}">Заблокирован</span>
+            </div>
+            <h1 th:text="${userProfile.username}">username</h1>
+            <p class="muted"><span th:text="#{profile.joined}">На форуме с</span>
+                <time th:datetime="${userProfile.joinedAt}" th:text="${#temporals.format(userProfile.joinedAt, 'dd.MM.yyyy')}">08.11.2026</time>
+            </p>
+        </div>
+        <div class="profile-stats">
+            <div class="profile-stat"><strong th:text="${userProfile.topics.totalElements}">12</strong><span th:text="#{profile.topics}">тем</span></div>
+            <div class="profile-stat"><strong th:text="${userProfile.posts.totalElements}">40</strong><span th:text="#{profile.posts}">ответов</span></div>
+        </div>
+    </header>
+
+    <div class="button-row" style="margin: -10px 0 28px" th:if="${currentUser != null and currentUser.username == userProfile.username}">
+        <a class="button button-yellow" th:href="@{/me/profile}" th:text="#{profile.edit}">Изменить профиль</a>
+    </div>
+
+    <div class="flash flash-error" th:if="${userProfile.blocked}" role="status">
+        <strong th:text="#{profile.blockedNotice}">Пользователь заблокирован.</strong>
+        <span th:if="${userProfile.blockReason != null}" th:text="${userProfile.blockReason}">Причина</span>
+    </div>
+
+    <div class="content-grid">
+        <section class="content-main" aria-labelledby="profile-topics-heading">
+            <div class="section-heading">
+                <h2 id="profile-topics-heading" th:text="#{profile.recentTopics}">Темы пользователя</h2>
+            </div>
+            <div class="topic-list" th:if="${!userProfile.topics.isEmpty()}">
+                <article class="topic-row" th:each="topic : ${userProfile.topics.content}">
+                    <div>
+                        <span class="badge badge-info" th:text="${topic.categoryName}">Категория</span>
+                        <h3 style="margin-top: 9px"><a th:href="@{/topics/{id}(id=${topic.id})}" th:text="${topic.title}">Тема</a></h3>
+                        <div class="topic-meta"><time th:datetime="${topic.createdAt}" th:text="${#temporals.format(topic.createdAt, 'dd.MM.yyyy HH:mm')}">Дата</time></div>
+                    </div>
+                    <div class="topic-stats">
+                        <div class="topic-stat"><strong th:text="${topic.replyCount}">0</strong><span th:text="#{topic.repliesLabel}">ответов</span></div>
+                        <div class="topic-stat"><strong th:text="${topic.likeCount}">0</strong><span th:text="#{topic.likesLabel}">нравится</span></div>
+                    </div>
+                </article>
+            </div>
+            <div class="empty-state" th:if="${userProfile.topics.isEmpty()}">
+                <span class="empty-state-mark" aria-hidden="true">#</span>
+                <h3 th:text="#{profile.noTopics}">Тем пока нет</h3>
+            </div>
+            <th:block th:with="baseUrl=${'/users/' + userProfile.username}, querySuffix=${'&amp;postPage=' + userProfile.posts.number}">
+                <nav th:replace="~{fragments/pagination :: namedPagination(${userProfile.topics}, ${baseUrl}, 'topicPage', ${querySuffix})}"></nav>
+            </th:block>
+        </section>
+
+        <aside class="content-aside" aria-labelledby="profile-posts-heading">
+            <div class="section-heading"><h2 id="profile-posts-heading" th:text="#{profile.recentPosts}">Последние ответы</h2></div>
+            <div class="activity-list" th:if="${!userProfile.posts.isEmpty()}">
+                <article class="activity-item" th:each="post : ${userProfile.posts.content}">
+                    <p th:if="${post.status.name() == 'VISIBLE'}" th:text="${#strings.abbreviate(post.body, 180)}">Текст ответа</p>
+                    <p class="muted" th:unless="${post.status.name() == 'VISIBLE'}" th:text="#{post.unavailable}">Публикация недоступна.</p>
+                    <div class="post-meta">
+                        <time th:datetime="${post.createdAt}" th:text="${#temporals.format(post.createdAt, 'dd.MM.yyyy HH:mm')}">Дата</time>
+                        <span th:text="#{post.likesCount(${post.likeCount})}">0 отметок</span>
+                    </div>
+                </article>
+            </div>
+            <div class="empty-state" th:if="${userProfile.posts.isEmpty()}">
+                <span class="empty-state-mark" aria-hidden="true">…</span>
+                <h3 th:text="#{profile.noPosts}">Ответов пока нет</h3>
+            </div>
+            <th:block th:with="baseUrl=${'/users/' + userProfile.username}, querySuffix=${'&amp;topicPage=' + userProfile.topics.number}">
+                <nav th:replace="~{fragments/pagination :: namedPagination(${userProfile.posts}, ${baseUrl}, 'postPage', ${querySuffix})}"></nav>
+            </th:block>
+        </aside>
+    </div>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

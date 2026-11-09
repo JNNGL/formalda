@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ru" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head(${#messages.msg('admin.categories.title')})}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main id="main-content" class="page-shell page-shell-wide">
+    <div th:replace="~{fragments/flash :: flash}"></div>
+    <div class="admin-layout">
+        <aside class="admin-sidebar">
+            <p class="admin-sidebar-title" th:text="#{admin.sidebar}">Управление</p>
+            <nav th:attr="aria-label=#{admin.navigation}"><a class="active" aria-current="page" th:href="@{/admin/categories}" th:text="#{admin.categories}">Категории</a><a th:href="@{/admin/users}" th:text="#{admin.users}">Пользователи</a><a th:href="@{/moderation/reports}" th:text="#{moderation.reports}">Жалобы</a><a th:href="@{/}" th:text="#{nav.forum}">На форум</a></nav>
+        </aside>
+        <section aria-labelledby="admin-categories-heading">
+            <header class="page-header"><div><p class="eyebrow" th:text="#{admin.eyebrow}">Администрирование</p><h1 id="admin-categories-heading" class="page-title-compact" th:text="#{admin.categories.title}">Категории</h1><p class="lead" th:text="#{admin.categories.subtitle}">Управляйте разделами форума, их порядком и доступностью.</p></div><a class="button button-coral" th:href="@{/admin/categories/new}" th:text="#{admin.category.create}">Добавить категорию</a></header>
+            <ol class="admin-list" th:if="${categories != null and !categories.isEmpty()}">
+                <li class="admin-row" th:each="category : ${categories.content}">
+                    <div>
+                        <div class="meta-list"><span class="badge badge-info" th:text="#{admin.category.order(${category.sortOrder})}">Порядок: 1</span><span class="badge" th:classappend="${category.enabled ? 'badge-success' : 'badge-muted'}" th:text="${category.enabled ? #messages.msg('admin.enabled') : #messages.msg('admin.disabled')}">Включена</span></div>
+                        <h3 style="margin-top: 10px" th:text="${category.name}">Категория</h3>
+                        <p th:text="${category.description}">Описание</p>
+                    </div>
+                    <div class="admin-row-actions"><a class="button button-small" th:href="@{/categories/{id}(id=${category.id})}" th:text="#{action.view}">Открыть</a><a class="button button-small button-yellow" th:href="@{/admin/categories/{id}/edit(id=${category.id})}" th:text="#{action.edit}">Изменить</a></div>
+                </li>
+            </ol>
+            <div class="empty-state" th:if="${categories == null or categories.isEmpty()}"><span class="empty-state-mark" aria-hidden="true">+</span><h2 th:text="#{admin.categories.empty}">Категорий нет</h2><p th:text="#{admin.categories.emptyHint}">Создайте первый раздел, чтобы участники могли начать обсуждения.</p><a class="button button-yellow" th:href="@{/admin/categories/new}" th:text="#{admin.category.create}">Добавить категорию</a></div>
+            <th:block th:with="baseUrl='/admin/categories', querySuffix=''"><nav th:replace="~{fragments/pagination :: pagination(${categories}, ${baseUrl}, ${querySuffix})}"></nav></th:block>
+        </section>
+    </div>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="flash" class="flash-stack" aria-live="polite">
+    <div class="flash flash-success" th:if="${success != null}" role="status">
+        <strong th:text="#{flash.success}">Готово:</strong>
+        <span th:text="${#messages.msgOrNull(success) != null ? #messages.msg(success) : success}">Операция выполнена.</span>
+    </div>
+    <div class="flash flash-error" th:if="${error != null}" role="alert">
+        <strong th:text="#{flash.error}">Ошибка:</strong>
+        <span th:text="${#messages.msgOrNull(error) != null ? #messages.msg(error) : error}">Не удалось выполнить операцию.</span>
+    </div>
+    <div class="flash flash-info" th:if="${message != null}" role="status">
+        <span th:text="${#messages.msgOrNull(message) != null ? #messages.msg(message) : message}">Сообщение</span>
+    </div>
+    <div class="flash flash-success" th:if="${successMessage != null}" role="status">
+        <strong th:text="#{flash.success}">Готово:</strong>
+        <span th:text="${#messages.msgOrNull(successMessage) != null ? #messages.msg(successMessage) : successMessage}">Операция выполнена.</span>
+    </div>
+    <div class="flash flash-error" th:if="${errorMessage != null}" role="alert">
+        <strong th:text="#{flash.error}">Ошибка:</strong>
+        <span th:text="${#messages.msgOrNull(errorMessage) != null ? #messages.msg(errorMessage) : errorMessage}">Не удалось выполнить операцию.</span>
+    </div>
+</div>
+
+<div th:fragment="formErrors(form)" class="form-summary form-summary-error"
+     th:if="${#fields.hasAnyErrors()}" role="alert">
+    <strong th:text="#{validation.summary}">Проверьте заполнение формы</strong>
+    <ul>
+        <li th:each="err : ${#fields.allErrors()}" th:text="${err}">Ошибка</li>
+    </ul>
+</div>
+</body>
+</html>

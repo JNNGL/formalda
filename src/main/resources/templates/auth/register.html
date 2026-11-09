@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head(${#messages.msg('auth.register.title')})}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main id="main-content" class="page-shell">
+    <div th:replace="~{fragments/flash :: flash}"></div>
+    <div class="auth-layout">
+        <section class="auth-aside panel-coral" aria-labelledby="register-welcome">
+            <span class="auth-aside-mark" aria-hidden="true">+</span>
+            <h1 id="register-welcome" class="page-title-compact" th:text="#{auth.register.welcome}">Станьте частью Formalda</h1>
+            <p class="lead" th:text="#{auth.register.welcomeText}">Задавайте вопросы, делитесь знаниями и находите единомышленников.</p>
+            <ul>
+                <li th:text="#{auth.register.rule1}">Один аккаунт — одна репутация</li>
+                <li th:text="#{auth.register.rule2}">Уважайте участников</li>
+                <li th:text="#{auth.register.rule3}">Пишите по существу</li>
+            </ul>
+        </section>
+
+        <section class="form-card" aria-labelledby="register-title">
+            <p class="eyebrow" th:text="#{auth.account}">Аккаунт</p>
+            <h2 id="register-title" th:text="#{auth.register.title}">Регистрация</h2>
+            <p class="lead" style="margin-bottom: 24px" th:text="#{auth.register.subtitle}">После регистрации мы отправим шестизначный код на почту.</p>
+
+            <form th:action="@{/auth/register}" th:object="${registrationForm}" method="post">
+                <div th:replace="~{fragments/flash :: formErrors(${registrationForm})}"></div>
+                <div class="form-grid">
+                    <div class="field field-full">
+                        <label class="required" for="username" th:text="#{auth.username}">Имя пользователя</label>
+                        <input id="username" type="text" th:field="*{username}" autocomplete="username" required minlength="3" maxlength="30"
+                               th:attr="aria-invalid=${#fields.hasErrors('username')},aria-describedby=${#fields.hasErrors('username') ? 'username-help username-error' : 'username-help'},aria-errormessage=${#fields.hasErrors('username') ? 'username-error' : null}"
+                               th:classappend="${#fields.hasErrors('username')} ? 'field-error-input'">
+                        <small id="username-help" class="field-help" th:text="#{auth.username.help}">От 3 до 30 символов.</small>
+                        <span id="username-error" class="field-error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}">Ошибка</span>
+                    </div>
+                    <div class="field field-full">
+                        <label class="required" for="email" th:text="#{auth.email}">Электронная почта</label>
+                        <input id="email" type="email" th:field="*{email}" autocomplete="email" required maxlength="254"
+                               th:attr="aria-invalid=${#fields.hasErrors('email')},aria-describedby=${#fields.hasErrors('email') ? 'email-error' : null},aria-errormessage=${#fields.hasErrors('email') ? 'email-error' : null}"
+                               th:classappend="${#fields.hasErrors('email')} ? 'field-error-input'">
+                        <span id="email-error" class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Ошибка</span>
+                    </div>
+                    <div class="field">
+                        <label class="required" for="password" th:text="#{auth.password}">Пароль</label>
+                        <input id="password" type="password" th:field="*{password}" autocomplete="new-password" required minlength="8"
+                               th:attr="aria-invalid=${#fields.hasErrors('password')},aria-describedby=${#fields.hasErrors('password') ? 'password-help password-error' : 'password-help'},aria-errormessage=${#fields.hasErrors('password') ? 'password-error' : null}"
+                               th:classappend="${#fields.hasErrors('password')} ? 'field-error-input'">
+                        <small id="password-help" class="field-help" th:text="#{auth.password.help}">Не менее 8 символов.</small>
+                        <span id="password-error" class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Ошибка</span>
+                    </div>
+                    <div class="field">
+                        <label class="required" for="passwordConfirmation" th:text="#{auth.passwordConfirm}">Повторите пароль</label>
+                        <input id="passwordConfirmation" type="password" th:field="*{passwordConfirmation}" autocomplete="new-password" required minlength="8"
+                               th:attr="aria-invalid=${#fields.hasErrors('passwordConfirmation')},aria-describedby=${#fields.hasErrors('passwordConfirmation') ? 'password-confirmation-error' : null},aria-errormessage=${#fields.hasErrors('passwordConfirmation') ? 'password-confirmation-error' : null}"
+                               th:classappend="${#fields.hasErrors('passwordConfirmation')} ? 'field-error-input'">
+                        <span id="password-confirmation-error" class="field-error" th:if="${#fields.hasErrors('passwordConfirmation')}" th:errors="*{passwordConfirmation}">Ошибка</span>
+                    </div>
+                </div>
+                <label class="checkbox-field" style="margin-top: 20px">
+                    <input type="checkbox" required>
+                    <span th:text="#{auth.register.agreement}">Я согласен соблюдать правила сообщества.</span>
+                </label>
+                <div class="form-actions">
+                    <button class="button button-coral" type="submit" th:text="#{auth.register.submit}">Создать аккаунт</button>
+                    <a th:href="@{/auth/login}" th:text="#{auth.register.hasAccount}">У меня уже есть аккаунт</a>
+                </div>
+            </form>
+        </section>
+    </div>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

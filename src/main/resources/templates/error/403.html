@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="ru" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head(${#messages.msg('error.403.title')})}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main id="main-content" class="page-shell error-page">
+    <section class="error-card">
+        <span class="error-code">403</span>
+        <h1 class="page-title-compact" th:text="#{error.403.title}">Доступ закрыт</h1>
+        <p class="lead" th:text="#{error.403.text}">У вас нет прав для этого действия или раздела.</p>
+        <p class="flash flash-error" th:if="${errorMessage != null}" th:text="${#messages.msgOrNull(errorMessage) != null ? #messages.msg(errorMessage) : errorMessage}">Описание ошибки</p>
+        <div class="button-row" style="margin-top: 26px; justify-content: center"><a class="button button-ink" th:href="@{/}" th:text="#{error.home}">На главную</a><a class="button" th:href="@{/auth/login}" th:text="#{nav.login}">Войти</a></div>
+    </section>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

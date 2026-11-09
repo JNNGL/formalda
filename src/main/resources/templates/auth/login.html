@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head(${#messages.msg('auth.login.title')})}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main id="main-content" class="page-shell">
+    <div th:replace="~{fragments/flash :: flash}"></div>
+    <div class="auth-layout">
+        <section class="auth-aside" aria-labelledby="login-welcome">
+            <span class="auth-aside-mark" aria-hidden="true">#</span>
+            <h1 id="login-welcome" class="page-title-compact" th:text="#{auth.login.welcome}">С возвращением!</h1>
+            <p class="lead" th:text="#{auth.login.welcomeText}">Продолжайте разговор там, где остановились.</p>
+            <ul>
+                <li th:text="#{auth.feature.topics}">Создавайте темы</li>
+                <li th:text="#{auth.feature.bookmarks}">Сохраняйте полезное</li>
+                <li th:text="#{auth.feature.notifications}">Не пропускайте ответы</li>
+            </ul>
+        </section>
+
+        <section class="form-card" aria-labelledby="login-title">
+            <p class="eyebrow" th:text="#{auth.account}">Аккаунт</p>
+            <h2 id="login-title" th:text="#{auth.login.title}">Вход</h2>
+            <p class="lead" style="margin-bottom: 24px" th:text="#{auth.login.subtitle}">Введите почту или имя пользователя.</p>
+
+            <div class="flash flash-error" role="alert" th:if="${param.error}">
+                <strong th:text="#{flash.error}">Ошибка:</strong>
+                <span th:text="#{auth.login.error}">Неверные данные или аккаунт недоступен.</span>
+            </div>
+            <div class="flash flash-success" role="status" th:if="${param.logout}">
+                <span th:text="#{auth.login.logoutSuccess}">Вы вышли из аккаунта.</span>
+            </div>
+            <div class="flash flash-success" role="status" th:if="${param.verified}">
+                <span th:text="#{auth.login.verified}">Почта подтверждена. Теперь можно войти.</span>
+            </div>
+
+            <form th:action="@{/auth/login}" method="post" class="stack">
+                <div class="field">
+                    <label class="required" for="identifier" th:text="#{auth.login.identifier}">Почта или имя пользователя</label>
+                    <input id="identifier" name="identifier" type="text" autocomplete="username" required autofocus
+                           th:placeholder="#{auth.login.identifierPlaceholder}">
+                </div>
+                <div class="field">
+                    <label class="required" for="password" th:text="#{auth.password}">Пароль</label>
+                    <input id="password" name="password" type="password" autocomplete="current-password" required>
+                </div>
+                <button class="button button-yellow" type="submit" th:text="#{auth.login.submit}">Войти</button>
+            </form>
+            <p style="margin: 24px 0 0">
+                <span th:text="#{auth.login.noAccount}">Ещё нет аккаунта?</span>
+                <a th:href="@{/auth/register}" th:text="#{auth.register.link}">Зарегистрироваться</a>
+            </p>
+        </section>
+    </div>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

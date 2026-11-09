@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ru" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head(${#messages.msg('notifications.title')})}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main id="main-content" class="page-shell">
+    <div th:replace="~{fragments/flash :: flash}"></div>
+    <header class="page-header">
+        <div><p class="eyebrow" th:text="#{me.eyebrow}">Личный раздел</p><h1 class="page-title-compact" th:text="#{notifications.title}">Уведомления</h1><p class="lead" th:text="#{notifications.subtitle}">Ответы и события в ваших обсуждениях.</p></div>
+        <form th:if="${notifications != null and !notifications.isEmpty()}" th:action="@{/me/notifications/read-all}" method="post"><button class="button button-yellow" type="submit" th:text="#{notifications.readAll}">Прочитать все</button></form>
+    </header>
+    <nav class="tabs" th:attr="aria-label=#{me.navigation}"><a th:href="@{/me/bookmarks}" th:text="#{nav.bookmarks}">Закладки</a><a th:href="@{/me/subscriptions}" th:text="#{nav.subscriptions}">Подписки</a><a class="active" aria-current="page" th:href="@{/me/notifications}" th:text="#{nav.notifications}">Уведомления</a></nav>
+    <ol class="notification-list" th:if="${notifications != null and !notifications.isEmpty()}">
+        <li class="notification-item" th:classappend="${!notification.read} ? 'unread'" th:each="notification : ${notifications.content}">
+            <div>
+                <span class="badge badge-coral" th:if="${!notification.read}" th:text="#{notifications.new}">Новое</span>
+                <p>
+                    <strong th:text="${notification.actorUsername != null ? notification.actorUsername : 'Formalda'}">user</strong>
+                    <span th:text="${#messages.msg('notification.' + #strings.toLowerCase(notification.type))}">ответил в теме</span>
+                    <a th:if="${notification.postId != null}" th:href="@{/posts/{id}(id=${notification.postId})}" th:text="${notification.topicTitle}">Тема</a>
+                    <a th:if="${notification.postId == null and notification.topicId != null}" th:href="@{/topics/{id}(id=${notification.topicId})}" th:text="${notification.topicTitle}">Тема</a>
+                </p>
+                <time class="small muted" th:datetime="${notification.createdAt}" th:text="${#temporals.format(notification.createdAt, 'dd.MM.yyyy HH:mm')}">Дата</time>
+            </div>
+            <form th:if="${!notification.read}" th:action="@{/me/notifications/{id}/read(id=${notification.id})}" method="post"><button class="button button-small" type="submit" th:text="#{notifications.markRead}">Прочитано</button></form>
+        </li>
+    </ol>
+    <div class="empty-state" th:if="${notifications == null or notifications.isEmpty()}"><span class="empty-state-mark" aria-hidden="true">✓</span><h2 th:text="#{notifications.empty}">Новых событий нет</h2><p th:text="#{notifications.emptyHint}">Здесь появятся ответы в темах и на ваши публикации.</p></div>
+    <th:block th:with="baseUrl='/me/notifications', querySuffix=''"><nav th:replace="~{fragments/pagination :: pagination(${notifications}, ${baseUrl}, ${querySuffix})}"></nav></th:block>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

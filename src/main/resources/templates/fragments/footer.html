@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<body>
+<footer class="site-footer" th:fragment="footer">
+    <div class="footer-inner">
+        <div>
+            <a class="brand brand-footer" th:href="@{/}"><span class="brand-mark" aria-hidden="true">F</span><span>Formalda</span></a>
+            <p th:text="#{footer.tagline}">Место для содержательных разговоров.</p>
+        </div>
+        <nav th:attr="aria-label=#{footer.navigation}">
+            <a th:href="@{/}" th:text="#{nav.categories}">Категории</a>
+            <a th:href="@{/search}" th:text="#{nav.search}">Поиск</a>
+            <a th:href="@{/auth/register}" th:text="#{nav.register}">Регистрация</a>
+        </nav>
+        <p class="footer-copy">© <span th:text="${#temporals.year(#temporals.createNow())}">2026</span> Formalda</p>
+    </div>
+</footer>
+</body>
+</html>

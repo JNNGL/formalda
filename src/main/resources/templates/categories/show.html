@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ru" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head(${category.name})}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main id="main-content" class="page-shell">
+    <div th:replace="~{fragments/flash :: flash}"></div>
+    <nav aria-label="Хлебные крошки" th:attr="aria-label=#{breadcrumbs.label}">
+        <ol class="breadcrumbs">
+            <li><a th:href="@{/}" th:text="#{nav.home}">Главная</a></li>
+            <li aria-current="page" th:text="${category.name}">Категория</li>
+        </ol>
+    </nav>
+
+    <header class="page-header">
+        <div class="page-header-copy">
+            <p class="eyebrow" th:text="#{category.eyebrow}">Категория</p>
+            <h1 class="page-title-compact" th:text="${category.name}">Разработка</h1>
+            <p class="lead" th:text="${category.description}">Описание категории.</p>
+            <div class="meta-list" style="margin-top: 13px">
+                <span class="badge badge-muted" th:if="${category.enabled != null and !category.enabled}" th:text="#{category.disabledBadge}">Отключена</span>
+            </div>
+        </div>
+        <a class="button button-coral" sec:authorize="isAuthenticated()"
+           th:if="${category.enabled == null or category.enabled}"
+           th:href="@{/topics/new(categoryId=${category.id})}" th:text="#{topic.create}">Создать тему</a>
+    </header>
+
+    <div class="flash flash-info" th:if="${category.enabled != null and !category.enabled}" role="status">
+        <span th:text="#{category.disabledNotice}">Категория отключена и доступна только для чтения.</span>
+    </div>
+
+    <section aria-labelledby="topics-heading">
+        <div class="toolbar">
+            <h2 id="topics-heading" class="sr-only" th:text="#{category.topics}">Темы категории</h2>
+            <form class="filter-form" th:action="@{/categories/{id}(id=${category.id})}" method="get">
+                <div class="filter-field">
+                    <label for="status" th:text="#{filter.status}">Статус</label>
+                    <select id="status" name="status" data-auto-submit>
+                        <option value="" th:selected="${param.status == null or param.status[0] == ''}" th:text="#{filter.allStatuses}">Все</option>
+                        <option value="OPEN" th:selected="${param.status != null and param.status[0] == 'OPEN'}" th:text="#{topic.status.open}">Открытые</option>
+                        <option value="CLOSED" th:selected="${param.status != null and param.status[0] == 'CLOSED'}" th:text="#{topic.status.closed}">Закрытые</option>
+                        <option value="ARCHIVED" th:selected="${param.status != null and param.status[0] == 'ARCHIVED'}" th:text="#{topic.status.archived}">Архивные</option>
+                    </select>
+                </div>
+                <div class="filter-field">
+                    <label for="sort" th:text="#{filter.sort}">Сортировка</label>
+                    <select id="sort" name="sort" data-auto-submit>
+                        <option value="UPDATED" th:selected="${param.sort == null or param.sort[0] == 'UPDATED'}" th:text="#{sort.updated}">Последние обновления</option>
+                        <option value="NEW" th:selected="${param.sort != null and param.sort[0] == 'NEW'}" th:text="#{sort.new}">Новые темы</option>
+                        <option value="POPULAR" th:selected="${param.sort != null and param.sort[0] == 'POPULAR'}" th:text="#{sort.popular}">Популярные</option>
+                    </select>
+                </div>
+                <button class="button button-small button-ink" type="submit" th:text="#{filter.apply}">Применить</button>
+            </form>
+        </div>
+
+        <div class="topic-list" th:if="${topics != null and !topics.isEmpty()}">
+            <article class="topic-row" th:each="topic : ${topics.content}">
+                <div>
+                    <div class="meta-list" style="margin-bottom: 7px">
+                        <span class="badge badge-pinned" th:if="${topic.pinned}" th:text="#{topic.pinned}">Закреплено</span>
+                        <span class="badge" th:classappend="${'badge-' + #strings.toLowerCase(topic.status)}"
+                              th:text="${#messages.msg('topic.status.' + #strings.toLowerCase(topic.status))}">Открыта</span>
+                    </div>
+                    <h2><a th:href="@{/topics/{id}(id=${topic.id})}" th:text="${topic.title}">Название темы</a></h2>
+                    <div class="topic-meta">
+                        <span><span th:text="#{topic.by}">Автор:</span> <a th:href="@{/users/{username}(username=${topic.authorUsername})}" th:text="${topic.authorUsername}">user</a></span>
+                        <time th:datetime="${topic.createdAt}" th:text="${#temporals.format(topic.createdAt, 'dd.MM.yyyy HH:mm')}">08.11.2026</time>
+                        <span th:if="${topic.lastActivityAt != null}"><span th:text="#{topic.updated}">Обновлена</span> <time th:datetime="${topic.lastActivityAt}" th:text="${#temporals.format(topic.lastActivityAt, 'dd.MM.yyyy HH:mm')}">08.11.2026</time></span>
+                    </div>
+                </div>
+                <div class="topic-stats" aria-label="Статистика" th:attr="aria-label=#{topic.stats}">
+                    <div class="topic-stat"><strong th:text="${topic.replyCount}">12</strong><span th:text="#{topic.repliesLabel}">ответов</span></div>
+                    <div class="topic-stat"><strong th:text="${topic.likeCount}">8</strong><span th:text="#{topic.likesLabel}">нравится</span></div>
+                </div>
+            </article>
+        </div>
+
+        <div class="empty-state" th:if="${topics == null or topics.isEmpty()}">
+            <span class="empty-state-mark" aria-hidden="true">?</span>
+            <h2 th:text="#{category.noTopics}">Тем пока нет</h2>
+            <p th:text="#{category.noTopicsHint}">Создайте первое обсуждение в этой категории.</p>
+            <a class="button button-yellow" sec:authorize="isAuthenticated()" th:if="${category.enabled == null or category.enabled}"
+               th:href="@{/topics/new(categoryId=${category.id})}" th:text="#{topic.create}">Создать тему</a>
+        </div>
+
+        <th:block th:with="baseUrl=${'/categories/' + category.id}, querySuffix=${'&amp;status=' + (param.status != null ? param.status[0] : '') + '&amp;sort=' + (param.sort != null ? param.sort[0] : 'UPDATED')}">
+            <nav th:replace="~{fragments/pagination :: pagination(${topics}, ${baseUrl}, ${querySuffix})}"></nav>
+        </th:block>
+    </section>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ru" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head(${#messages.msg('error.general.title')})}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main id="main-content" class="page-shell error-page">
+    <section class="error-card panel-coral">
+        <span class="error-code">!</span>
+        <h1 class="page-title-compact" th:text="#{error.general.title}">Что-то пошло не так</h1>
+        <p class="lead" th:text="#{error.general.text}">Мы не смогли обработать запрос. Попробуйте ещё раз.</p>
+        <p class="flash flash-error" th:if="${errorMessage != null}" th:text="${#messages.msgOrNull(errorMessage) != null ? #messages.msg(errorMessage) : errorMessage}">Описание ошибки</p>
+        <p class="small muted" th:if="${requestId != null}"><span th:text="#{error.requestId}">Код запроса:</span> <code th:text="${requestId}">id</code></p>
+        <div class="button-row" style="margin-top: 26px; justify-content: center"><a class="button button-ink" th:href="@{/}" th:text="#{error.home}">На главную</a><a class="button button-yellow" th:href="@{/search}" th:text="#{nav.search}">Поиск</a></div>
+    </section>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ru" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head(${#messages.msg('bookmarks.title')})}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main id="main-content" class="page-shell">
+    <div th:replace="~{fragments/flash :: flash}"></div>
+    <header class="page-header">
+        <div><p class="eyebrow" th:text="#{me.eyebrow}">Личный раздел</p><h1 class="page-title-compact" th:text="#{bookmarks.title}">Закладки</h1><p class="lead" th:text="#{bookmarks.subtitle}">Темы, к которым хочется вернуться.</p></div>
+    </header>
+    <nav class="tabs" th:attr="aria-label=#{me.navigation}">
+        <a class="active" aria-current="page" th:href="@{/me/bookmarks}" th:text="#{nav.bookmarks}">Закладки</a>
+        <a th:href="@{/me/subscriptions}" th:text="#{nav.subscriptions}">Подписки</a>
+        <a th:href="@{/me/notifications}" th:text="#{nav.notifications}">Уведомления</a>
+    </nav>
+    <div class="topic-list" th:if="${bookmarks != null and !bookmarks.isEmpty()}">
+        <article class="topic-row" th:each="topic : ${bookmarks.content}">
+            <div>
+                <span class="badge badge-purple" th:text="${topic.categoryName}">Категория</span>
+                <h2 style="margin-top: 9px"><a th:href="@{/topics/{id}(id=${topic.id})}" th:text="${topic.title}">Тема</a></h2>
+                <div class="topic-meta"><span th:text="${topic.authorUsername}">user</span><time th:datetime="${topic.lastActivityAt}" th:text="${#temporals.format(topic.lastActivityAt, 'dd.MM.yyyy HH:mm')}">Дата</time></div>
+            </div>
+            <form th:action="@{/topics/{id}/bookmark(id=${topic.id})}" method="post">
+                <button class="button button-small" type="submit" th:text="#{bookmarks.remove}">Убрать</button>
+            </form>
+        </article>
+    </div>
+    <div class="empty-state" th:if="${bookmarks == null or bookmarks.isEmpty()}"><span class="empty-state-mark" aria-hidden="true">☆</span><h2 th:text="#{bookmarks.empty}">Закладок пока нет</h2><p th:text="#{bookmarks.emptyHint}">Сохраняйте интересные темы на странице обсуждения.</p></div>
+    <th:block th:with="baseUrl='/me/bookmarks', querySuffix=''"><nav th:replace="~{fragments/pagination :: pagination(${bookmarks}, ${baseUrl}, ${querySuffix})}"></nav></th:block>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

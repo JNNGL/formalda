@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head(${#messages.msg('auth.verify.title')})}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main id="main-content" class="page-shell page-shell-narrow">
+    <div th:replace="~{fragments/flash :: flash}"></div>
+    <section class="form-card" aria-labelledby="verify-title">
+        <p class="eyebrow" th:text="#{auth.verify.step}">Последний шаг</p>
+        <h1 id="verify-title" class="page-title-compact" th:text="#{auth.verify.title}">Подтвердите почту</h1>
+        <p class="lead" style="margin-bottom: 25px" th:text="#{auth.verify.subtitle}">Введите шестизначный код из письма. Код действует 10 минут.</p>
+
+        <form th:action="@{/auth/verify}" th:object="${verificationForm}" method="post">
+            <div th:replace="~{fragments/flash :: formErrors(${verificationForm})}"></div>
+            <div class="stack">
+                <div class="field">
+                    <label class="required" for="email" th:text="#{auth.email}">Электронная почта</label>
+                    <input id="email" type="email" th:field="*{email}" autocomplete="email" required
+                           th:attr="aria-invalid=${#fields.hasErrors('email')},aria-describedby=${#fields.hasErrors('email') ? 'email-error' : null},aria-errormessage=${#fields.hasErrors('email') ? 'email-error' : null}"
+                           th:classappend="${#fields.hasErrors('email')} ? 'field-error-input'">
+                    <span id="email-error" class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Ошибка</span>
+                </div>
+                <div class="field">
+                    <label class="required" for="code" th:text="#{auth.verify.code}">Код подтверждения</label>
+                    <input id="code" type="text" th:field="*{code}" inputmode="numeric" autocomplete="one-time-code"
+                           pattern="[0-9]{6}" minlength="6" maxlength="6" required autofocus
+                           th:placeholder="#{auth.verify.codePlaceholder}"
+                           th:attr="aria-invalid=${#fields.hasErrors('code')},aria-describedby=${#fields.hasErrors('code') ? 'code-error' : null},aria-errormessage=${#fields.hasErrors('code') ? 'code-error' : null}"
+                           th:classappend="${#fields.hasErrors('code')} ? 'field-error-input'">
+                    <span id="code-error" class="field-error" th:if="${#fields.hasErrors('code')}" th:errors="*{code}">Ошибка</span>
+                </div>
+                <button class="button button-yellow" type="submit" th:text="#{auth.verify.submit}">Подтвердить</button>
+            </div>
+        </form>
+
+        <form class="form-actions" th:action="@{/auth/verify/resend}" method="post">
+            <input type="hidden" name="email" th:value="${email != null ? email : verificationForm.email}">
+            <span class="muted" th:text="#{auth.verify.noCode}">Не получили письмо?</span>
+            <button class="link-button" type="submit" th:text="#{auth.verify.resend}">Отправить код ещё раз</button>
+        </form>
+        <p class="form-actions"><a th:href="@{/auth/login}" th:text="#{auth.login.submit}">Войти</a></p>
+    </section>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

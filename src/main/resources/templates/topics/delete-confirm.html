@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ru" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head(${#messages.msg('delete.title')})}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main id="main-content" class="page-shell page-shell-narrow">
+    <div th:replace="~{fragments/flash :: flash}"></div>
+    <section class="form-card" aria-labelledby="delete-title">
+        <p class="eyebrow" th:text="#{delete.eyebrow}">Требуется подтверждение</p>
+        <h1 id="delete-title" class="page-title-compact" th:text="#{delete.title}">Удалить публикацию?</h1>
+        <p class="lead" th:text="#{delete.description}">Вместо текста останется отметка об удалении, чтобы сохранить структуру обсуждения.</p>
+        <div class="danger-zone" style="margin-top: 24px">
+            <strong th:text="${post != null ? post.body : #messages.msg('delete.publication')}">Публикация</strong>
+        </div>
+        <form class="form-actions" th:action="@{/posts/{id}/delete(id=${post.id})}" method="post">
+            <button class="button button-coral" type="submit" th:text="#{delete.confirm}">Да, удалить</button>
+            <a class="button button-plain" th:href="@{/posts/{id}(id=${post.id})}" th:text="#{action.cancel}">Отмена</a>
+        </form>
+    </section>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

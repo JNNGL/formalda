@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ru" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head(${topic.title})}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main id="main-content" class="page-shell">
+    <div th:replace="~{fragments/flash :: flash}"></div>
+    <nav th:attr="aria-label=#{breadcrumbs.label}">
+        <ol class="breadcrumbs">
+            <li><a th:href="@{/}" th:text="#{nav.home}">Главная</a></li>
+            <li><a th:href="@{/categories/{id}(id=${topic.categoryId})}" th:text="${topic.categoryName}">Категория</a></li>
+            <li aria-current="page" th:text="${topic.title}">Тема</li>
+        </ol>
+    </nav>
+
+    <header class="topic-header">
+        <div class="meta-list">
+            <span class="badge badge-pinned" th:if="${topic.pinned}" th:text="#{topic.pinned}">Закреплено</span>
+            <span class="badge" th:classappend="${'badge-' + #strings.toLowerCase(topic.status)}"
+                  th:text="${#messages.msg('topic.status.' + #strings.toLowerCase(topic.status))}">Открыта</span>
+            <a th:href="@{/categories/{id}(id=${topic.categoryId})}" th:text="${topic.categoryName}">Категория</a>
+        </div>
+        <h1 th:text="${topic.title}">Название обсуждения</h1>
+        <div class="topic-meta">
+            <span><span th:text="#{topic.by}">Автор:</span> <a th:href="@{/users/{username}(username=${topic.authorUsername})}" th:text="${topic.authorUsername}">user</a></span>
+            <time th:datetime="${topic.createdAt}" th:text="${#temporals.format(topic.createdAt, 'dd.MM.yyyy HH:mm')}">08.11.2026 12:30</time>
+            <span th:text="#{topic.views(${topic.viewCount})}">12 просмотров</span>
+            <span th:text="#{topic.replies(${topic.replyCount})}">4 ответа</span>
+        </div>
+        <ul class="tag-list" style="margin-top: 13px" th:if="${topic.tags != null and !topic.tags.isEmpty()}">
+            <li class="tag" th:each="tag : ${topic.tags}" th:text="${'#' + tag}">#java</li>
+        </ul>
+
+        <div class="topic-actions" sec:authorize="isAuthenticated()"
+             th:if="${(topic.categoryEnabled and topic.status.name() != 'ARCHIVED') or bookmarked or subscribed}">
+            <form th:if="${(topic.categoryEnabled and topic.status.name() != 'ARCHIVED') or bookmarked}"
+                  th:action="@{/topics/{id}/bookmark(id=${topic.id})}" method="post">
+                <button class="button button-small" th:classappend="${bookmarked} ? 'button-purple'" type="submit"
+                        th:text="${bookmarked ? #messages.msg('topic.bookmark.remove') : #messages.msg('topic.bookmark.add')}">В закладки</button>
+            </form>
+            <form th:if="${(topic.categoryEnabled and topic.status.name() != 'ARCHIVED') or subscribed}"
+                  th:action="@{/topics/{id}/subscribe(id=${topic.id})}" method="post">
+                <button class="button button-small" th:classappend="${subscribed} ? 'button-turquoise'" type="submit"
+                        th:text="${subscribed ? #messages.msg('topic.unsubscribe') : #messages.msg('topic.subscribe')}">Подписаться</button>
+            </form>
+            <a class="button button-small" th:if="${canEditTopic}" th:href="@{/topics/{id}/edit(id=${topic.id})}" th:text="#{action.edit}">Изменить</a>
+            <form th:if="${canClose}" th:action="@{/topics/{id}/close(id=${topic.id})}" method="post">
+                <button class="button button-small button-yellow" type="submit" th:text="#{topic.close}">Закрыть</button>
+            </form>
+            <form th:if="${canReopen}" th:action="@{/topics/{id}/reopen(id=${topic.id})}" method="post">
+                <button class="button button-small button-mint" type="submit" th:text="#{topic.reopen}">Открыть снова</button>
+            </form>
+            <form th:if="${canModerate}" th:action="@{/topics/{id}/pin(id=${topic.id})}" method="post">
+                <button class="button button-small button-coral" type="submit" th:text="${topic.pinned ? #messages.msg('topic.unpin') : #messages.msg('topic.pin')}">Закрепить</button>
+            </form>
+            <form th:if="${canModerate and topic.status.name() != 'ARCHIVED'}" th:action="@{/topics/{id}/archive(id=${topic.id})}" method="post">
+                <button class="button button-small" type="submit" th:text="#{topic.archive}">В архив</button>
+            </form>
+        </div>
+    </header>
+
+    <div class="flash flash-warning panel-yellow" th:if="${topic.status.name() == 'CLOSED'}" role="status">
+        <strong th:text="#{topic.closedTitle}">Тема закрыта.</strong>
+        <span th:text="#{topic.closedText}">Новые ответы недоступны.</span>
+    </div>
+    <div class="flash flash-info" th:if="${topic.status.name() == 'ARCHIVED'}" role="status">
+        <strong th:text="#{topic.archivedTitle}">Тема в архиве.</strong>
+        <span th:text="#{topic.archivedText}">Она доступна только для чтения.</span>
+    </div>
+    <div class="flash flash-info" th:if="${!topic.categoryEnabled}" role="status">
+        <strong th:text="#{category.readOnlyTitle}">Категория отключена.</strong>
+        <span th:text="#{category.disabled}">Обсуждения доступны только для чтения.</span>
+    </div>
+
+    <section aria-labelledby="discussion-heading">
+        <div class="section-heading">
+            <h2 id="discussion-heading" th:text="#{topic.discussion}">Обсуждение</h2>
+            <span class="badge badge-info" th:text="#{topic.postsCount(${posts.totalElements})}">5 публикаций</span>
+        </div>
+        <div class="post-list" th:if="${posts != null and !posts.isEmpty()}">
+            <th:block th:each="item : ${posts.content}">
+                <article th:replace="~{fragments/post :: post(${item}, ${topic})}"></article>
+            </th:block>
+        </div>
+        <div class="empty-state" th:if="${posts == null or posts.isEmpty()}">
+            <span class="empty-state-mark" aria-hidden="true">…</span>
+            <h3 th:text="#{topic.noPosts}">Публикации не найдены</h3>
+        </div>
+
+        <th:block th:with="baseUrl=${'/topics/' + topic.id}, querySuffix=''">
+            <nav th:replace="~{fragments/pagination :: pagination(${posts}, ${baseUrl}, ${querySuffix})}"></nav>
+        </th:block>
+    </section>
+
+    <section class="reply-panel panel panel-turquoise" th:if="${canReply}" aria-labelledby="reply-heading">
+        <h2 id="reply-heading" th:text="#{reply.title}">Ваш ответ</h2>
+        <form th:action="@{/topics/{id}/replies(id=${topic.id},page=${posts.number})}" th:object="${form}" method="post">
+            <div th:replace="~{fragments/flash :: formErrors(${form})}"></div>
+            <input type="hidden" th:field="*{replyToPostId}">
+            <p class="flash flash-info" th:if="${form.replyToPostId != null}">
+                <span th:text="#{reply.replyingTo(${form.replyToPostId})}">Ответ на публикацию</span>
+                <a th:href="@{/topics/{id}(id=${topic.id})}" th:text="#{action.cancel}">Отмена</a>
+            </p>
+            <div class="field">
+                <label class="required" for="reply-body" th:text="#{reply.body}">Текст ответа</label>
+                <textarea id="reply-body" th:field="*{body}" required maxlength="10000" rows="8" data-count-target="reply-counter"
+                          th:attr="aria-invalid=${#fields.hasErrors('body')},aria-describedby=${#fields.hasErrors('body') ? 'reply-body-help reply-body-error' : 'reply-body-help'},aria-errormessage=${#fields.hasErrors('body') ? 'reply-body-error' : null}"
+                          th:classappend="${#fields.hasErrors('body')} ? 'field-error-input'"></textarea>
+                <small id="reply-body-help" class="field-counter"><span id="reply-counter">0</span>/10000</small>
+                <span id="reply-body-error" class="field-error" th:if="${#fields.hasErrors('body')}" th:errors="*{body}">Ошибка</span>
+            </div>
+            <div class="form-actions">
+                <button class="button button-coral" type="submit" th:text="#{reply.submit}">Отправить ответ</button>
+            </div>
+        </form>
+    </section>
+    <section class="empty-state reply-panel" sec:authorize="isAnonymous()" th:if="${topic.categoryEnabled and topic.status.name() == 'OPEN'}">
+        <span class="empty-state-mark" aria-hidden="true">+</span>
+        <h2 th:text="#{reply.loginTitle}">Хотите ответить?</h2>
+        <p th:text="#{reply.loginText}">Войдите или создайте аккаунт, чтобы участвовать в обсуждении.</p>
+        <div class="button-row" style="justify-content: center">
+            <a class="button button-yellow" th:href="@{/auth/login}" th:text="#{nav.login}">Войти</a>
+            <a class="button" th:href="@{/auth/register}" th:text="#{nav.register}">Регистрация</a>
+        </div>
+    </section>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head(${#messages.msg('profile.settings')})}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main id="main-content" class="page-shell page-shell-narrow">
+    <div th:replace="~{fragments/flash :: flash}"></div>
+    <header class="page-header">
+        <div>
+            <p class="eyebrow" th:text="#{me.eyebrow}">Личный раздел</p>
+            <h1 class="page-title-compact" th:text="#{profile.settings}">Настройки профиля</h1>
+            <p class="lead" th:text="#{profile.settingsSubtitle}">Выберите имя, под которым вас видят другие участники.</p>
+        </div>
+    </header>
+    <nav class="tabs" th:attr="aria-label=#{me.navigation}">
+        <a class="active" aria-current="page" th:href="@{/me/profile}" th:text="#{profile.settings}">Профиль</a>
+        <a th:href="@{/me/bookmarks}" th:text="#{nav.bookmarks}">Закладки</a>
+        <a th:href="@{/me/subscriptions}" th:text="#{nav.subscriptions}">Подписки</a>
+        <a th:href="@{/me/notifications}" th:text="#{nav.notifications}">Уведомления</a>
+    </nav>
+    <form class="form-card" th:action="@{/me/profile}" th:object="${form}" method="post">
+        <div th:replace="~{fragments/flash :: formErrors(${form})}"></div>
+        <div class="field">
+            <label class="required" for="profile-username" th:text="#{profile.username}">Имя пользователя</label>
+            <input id="profile-username" type="text" th:field="*{username}" required minlength="3" maxlength="30"
+                   autocomplete="username"
+                   th:attr="aria-invalid=${#fields.hasErrors('username')},aria-describedby=${#fields.hasErrors('username') ? 'profile-username-help profile-username-error' : 'profile-username-help'},aria-errormessage=${#fields.hasErrors('username') ? 'profile-username-error' : null}"
+                   th:classappend="${#fields.hasErrors('username')} ? 'field-error-input'">
+            <small id="profile-username-help" class="field-help" th:text="#{profile.usernameHelp}">От 3 до 30 символов: буквы, цифры, точка, дефис и подчёркивание.</small>
+            <span id="profile-username-error" class="field-error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}">Ошибка</span>
+        </div>
+        <div class="form-actions">
+            <button class="button button-yellow" type="submit" th:text="#{action.save}">Сохранить</button>
+            <a th:href="@{/users/{username}(username=${form.username})}" th:text="#{action.cancel}">Отмена</a>
+        </div>
+    </form>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

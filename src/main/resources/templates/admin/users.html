@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ru" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head(${#messages.msg('admin.users.title')})}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main id="main-content" class="page-shell page-shell-wide">
+    <div th:replace="~{fragments/flash :: flash}"></div>
+    <div class="admin-layout">
+        <aside class="admin-sidebar"><p class="admin-sidebar-title" th:text="#{admin.sidebar}">Управление</p><nav th:attr="aria-label=#{admin.navigation}"><a th:href="@{/admin/categories}" th:text="#{admin.categories}">Категории</a><a class="active" aria-current="page" th:href="@{/admin/users}" th:text="#{admin.users}">Пользователи</a><a th:href="@{/moderation/reports}" th:text="#{moderation.reports}">Жалобы</a><a th:href="@{/}" th:text="#{nav.forum}">На форум</a></nav></aside>
+        <section aria-labelledby="admin-users-heading">
+            <header class="page-header"><div><p class="eyebrow" th:text="#{admin.eyebrow}">Администрирование</p><h1 id="admin-users-heading" class="page-title-compact" th:text="#{admin.users.title}">Пользователи</h1><p class="lead" th:text="#{admin.users.subtitle}">Находите аккаунты, назначайте роли и управляйте блокировками.</p></div></header>
+            <form class="panel panel-yellow" th:action="@{/admin/users}" method="get" role="search"><div class="hero-search"><label class="sr-only" for="user-search" th:text="#{admin.users.search}">Поиск пользователей</label><input id="user-search" type="search" name="query" th:value="${query}" th:placeholder="#{admin.users.searchPlaceholder}"><button class="button button-ink" type="submit" th:text="#{search.submit}">Найти</button></div></form>
+            <ol class="admin-list" style="margin-top: 26px" th:if="${users != null and !users.isEmpty()}">
+                <li class="admin-row" th:each="user : ${users.content}">
+                    <div><div class="meta-list"><span class="badge badge-purple" th:each="role : ${user.roles}" th:text="${#messages.msg('role.' + #strings.toLowerCase(role))}">Роль</span><span class="badge badge-success" th:if="${user.emailVerified}" th:text="#{admin.user.verified}">Почта подтверждена</span><span class="badge badge-warning" th:unless="${user.emailVerified}" th:text="#{admin.user.unverified}">Не подтверждён</span><span class="badge badge-danger" th:if="${user.blocked}" th:text="#{profile.blocked}">Заблокирован</span></div><h3 style="margin-top: 10px"><a th:href="@{/users/{username}(username=${user.username})}" th:text="${user.username}">user</a></h3><p class="small muted"><span th:text="${user.email}">mail@example.com</span> · <span th:text="#{profile.joined}">На форуме с</span> <time th:datetime="${user.createdAt}" th:text="${#temporals.format(user.createdAt, 'dd.MM.yyyy')}">Дата</time></p></div>
+                    <a class="button button-small button-yellow" th:href="@{/admin/users/{id}(id=${user.id})}" th:text="#{admin.user.manage}">Управлять</a>
+                </li>
+            </ol>
+            <div class="empty-state" th:if="${users == null or users.isEmpty()}"><span class="empty-state-mark" aria-hidden="true">?</span><h2 th:text="#{admin.users.empty}">Пользователи не найдены</h2><p th:text="#{admin.users.emptyHint}">Измените строку поиска.</p></div>
+            <th:block th:with="baseUrl='/admin/users', querySuffix=${'&amp;query=' + #uris.escapeQueryParam(query != null ? query : '')}"><nav th:replace="~{fragments/pagination :: pagination(${users}, ${baseUrl}, ${querySuffix})}"></nav></th:block>
+        </section>
+    </div>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

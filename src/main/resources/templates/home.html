@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ru" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head(${#messages.msg('home.metaTitle')})}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main id="main-content" class="page-shell">
+    <div th:replace="~{fragments/flash :: flash}"></div>
+
+    <section class="hero" aria-labelledby="hero-title">
+        <div>
+            <p class="eyebrow" th:text="#{home.eyebrow}">Форум сообщества</p>
+            <h1 id="hero-title" th:text="#{home.title}">Обсуждаем то, что действительно интересно.</h1>
+            <p class="lead" th:text="#{home.subtitle}">Выбирайте категорию, находите ответы и делитесь своим опытом.</p>
+            <form class="hero-search" th:action="@{/search}" method="get" role="search">
+                <label class="sr-only" for="home-search" th:text="#{search.label}">Поиск по форуму</label>
+                <input id="home-search" type="search" name="q" th:placeholder="#{search.placeholder}" required>
+                <button class="button button-ink" type="submit" th:text="#{search.submit}">Найти</button>
+            </form>
+            <div class="button-row" style="margin-top: 20px" sec:authorize="isAnonymous()">
+                <a class="button button-coral" th:href="@{/auth/register}" th:text="#{home.join}">Присоединиться</a>
+                <a class="button button-plain" th:href="@{/auth/login}" th:text="#{nav.login}">Войти</a>
+            </div>
+        </div>
+    </section>
+
+    <div class="content-grid">
+        <section class="content-main" aria-labelledby="categories-heading">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow" th:text="#{home.explore}">Исследуйте</p>
+                    <h2 id="categories-heading" th:text="#{home.categories}">Категории</h2>
+                </div>
+                <a sec:authorize="isAuthenticated()" class="button button-small button-yellow" th:href="@{/topics/new}" th:text="#{nav.newTopic}">Новая тема</a>
+            </div>
+
+            <div class="category-grid" th:if="${categories != null and !categories.isEmpty()}">
+                <article class="category-card" th:each="category : ${categories}">
+                    <h3><a th:href="@{/categories/{id}(id=${category.id})}" th:text="${category.name}">Разработка</a></h3>
+                    <p th:text="${category.description}">Вопросы и разговоры о разработке.</p>
+                    <div class="category-meta">
+                        <span th:text="#{category.topicCount(${category.topicCount})}">12 тем</span>
+                        <span th:if="${category.lastActivityAt != null}">
+                            <span th:text="#{category.lastActivity}">Активность</span>
+                            <time th:datetime="${category.lastActivityAt}" th:text="${#temporals.format(category.lastActivityAt, 'dd.MM.yyyy HH:mm')}">08.11.2026</time>
+                        </span>
+                    </div>
+                </article>
+            </div>
+
+            <div class="empty-state" th:if="${categories == null or categories.isEmpty()}">
+                <span class="empty-state-mark" aria-hidden="true">#</span>
+                <h3 th:text="#{home.noCategories}">Категорий пока нет</h3>
+                <p th:text="#{home.noCategoriesHint}">Администратор скоро подготовит пространство для обсуждений.</p>
+            </div>
+        </section>
+
+        <aside class="content-aside" aria-labelledby="recent-heading">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow" th:text="#{home.now}">Сейчас</p>
+                    <h2 id="recent-heading" th:text="#{home.recent}">Свежие обсуждения</h2>
+                </div>
+            </div>
+            <ol class="activity-list" th:if="${recentTopics != null and !recentTopics.isEmpty()}">
+                <li class="activity-item" th:each="topic : ${recentTopics}">
+                    <div class="meta-list" style="margin-bottom: 6px">
+                        <span class="badge badge-pinned" th:if="${topic.pinned}" th:text="#{topic.pinned}">Закреплено</span>
+                        <span th:text="${topic.categoryName}">Категория</span>
+                    </div>
+                    <a th:href="@{/topics/{id}(id=${topic.id})}" th:text="${topic.title}">Название темы</a>
+                    <div class="topic-meta" style="margin-top: 8px">
+                        <span th:text="${topic.authorUsername}">user</span>
+                        <time th:datetime="${topic.lastActivityAt}" th:text="${#temporals.format(topic.lastActivityAt, 'dd.MM HH:mm')}">08.11 12:30</time>
+                        <span th:text="#{topic.replies(${topic.replyCount})}">4 ответа</span>
+                    </div>
+                </li>
+            </ol>
+            <div class="empty-state" th:if="${recentTopics == null or recentTopics.isEmpty()}">
+                <span class="empty-state-mark" aria-hidden="true">+</span>
+                <h3 th:text="#{home.noTopics}">Пока тихо</h3>
+                <p th:text="#{home.noTopicsHint}">Начните первое обсуждение.</p>
+            </div>
+        </aside>
+    </div>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

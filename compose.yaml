@@ -1,10 +1,65 @@
+name: formalda
+
 services:
-  mariadb:
-    image: 'mariadb:latest'
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: formalda:local
+    restart: unless-stopped
     environment:
-      - 'MARIADB_DATABASE=mydatabase'
-      - 'MARIADB_PASSWORD=secret'
-      - 'MARIADB_ROOT_PASSWORD=verysecret'
-      - 'MARIADB_USER=myuser'
+      TZ: UTC
+      JAVA_TOOL_OPTIONS: -Duser.timezone=UTC
+      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb:3306/${DB_NAME:-formalda}?useUnicode=true&characterEncoding=utf8
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:-formalda}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      SPRING_MAIL_HOST: ${SMTP_HOST:-mailpit}
+      SPRING_MAIL_PORT: ${SMTP_PORT:-1025}
+      SPRING_MAIL_USERNAME: ${SMTP_USERNAME:-}
+      SPRING_MAIL_PASSWORD: ${SMTP_PASSWORD:-}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: ${SMTP_AUTH:-false}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: ${SMTP_STARTTLS:-false}
+      FORMALDA_BASE_URL: ${FORMALDA_BASE_URL:-http://localhost:8080}
+      FORMALDA_MAIL_FROM: ${FORMALDA_MAIL_FROM:-noreply@formalda.local}
+      FORMALDA_ADMIN_EMAIL: ${FORMALDA_ADMIN_EMAIL:-admin@formalda.local}
+      FORMALDA_ADMIN_USERNAME: ${FORMALDA_ADMIN_USERNAME:-admin}
+      FORMALDA_ADMIN_PASSWORD: ${FORMALDA_ADMIN_PASSWORD:?Set FORMALDA_ADMIN_PASSWORD in .env}
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
     ports:
-      - '3306'
+      - "${APP_PORT:-8080}:8080"
+
+  mariadb:
+    image: mariadb:11.4.8
+    restart: unless-stopped
+    environment:
+      TZ: UTC
+      MARIADB_DATABASE: ${DB_NAME:-formalda}
+      MARIADB_USER: ${DB_USER:-formalda}
+      MARIADB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Set DB_ROOT_PASSWORD in .env}
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
+    ports:
+      - "127.0.0.1:${DB_PORT:-3306}:3306"
+    volumes:
+      - mariadb-data:/var/lib/mysql
+
+  mailpit:
+    image: axllent/mailpit:v1.21.8
+    restart: unless-stopped
+    environment:
+      MP_MAX_MESSAGES: 5000
+    ports:
+      - "127.0.0.1:${MAILPIT_SMTP_PORT:-1025}:1025"
+      - "127.0.0.1:${MAILPIT_UI_PORT:-8025}:8025"
+
+volumes:
+  mariadb-data:

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head(${#messages.msg('topic.create')})}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main id="main-content" class="page-shell page-shell-narrow">
+    <div th:replace="~{fragments/flash :: flash}"></div>
+    <nav th:attr="aria-label=#{breadcrumbs.label}">
+        <ol class="breadcrumbs">
+            <li><a th:href="@{/}" th:text="#{nav.home}">Главная</a></li>
+            <li aria-current="page" th:text="#{topic.create}">Новая тема</li>
+        </ol>
+    </nav>
+    <header class="page-header">
+        <div>
+            <p class="eyebrow" th:text="#{topic.new.eyebrow}">Новое обсуждение</p>
+            <h1 class="page-title-compact" th:text="#{topic.new.title}">Создать тему</h1>
+            <p class="lead" th:text="#{topic.new.subtitle}">Сформулируйте понятный заголовок и добавьте необходимые детали.</p>
+        </div>
+    </header>
+
+    <form class="form-card" th:action="@{/topics/new}" th:object="${form}" method="post">
+        <div th:replace="~{fragments/flash :: formErrors(${form})}"></div>
+        <div class="stack">
+            <div class="field">
+                <label class="required" for="categoryId" th:text="#{topic.form.category}">Категория</label>
+                <select id="categoryId" th:field="*{categoryId}" required
+                        th:attr="aria-invalid=${#fields.hasErrors('categoryId')},aria-describedby=${#fields.hasErrors('categoryId') ? 'category-error' : null},aria-errormessage=${#fields.hasErrors('categoryId') ? 'category-error' : null}"
+                        th:classappend="${#fields.hasErrors('categoryId')} ? 'field-error-input'">
+                    <option value="" th:text="#{topic.form.chooseCategory}">Выберите категорию</option>
+                    <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}">Категория</option>
+                </select>
+                <span id="category-error" class="field-error" th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}">Ошибка</span>
+            </div>
+            <div class="field">
+                <label class="required" for="title" th:text="#{topic.form.title}">Заголовок</label>
+                <input id="title" type="text" th:field="*{title}" required minlength="5" maxlength="160"
+                       data-count-target="title-counter"
+                       th:attr="aria-invalid=${#fields.hasErrors('title')},aria-describedby=${#fields.hasErrors('title') ? 'title-help title-error' : 'title-help'},aria-errormessage=${#fields.hasErrors('title') ? 'title-error' : null}"
+                       th:classappend="${#fields.hasErrors('title')} ? 'field-error-input'">
+                <small id="title-help" class="field-counter"><span id="title-counter">0</span>/160</small>
+                <span id="title-error" class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">Ошибка</span>
+            </div>
+            <div class="field">
+                <label class="required" for="body" th:text="#{topic.form.content}">Текст</label>
+                <textarea id="body" th:field="*{body}" required minlength="10" maxlength="10000" rows="12"
+                          data-count-target="body-counter"
+                          th:attr="aria-invalid=${#fields.hasErrors('body')},aria-describedby=${#fields.hasErrors('body') ? 'body-help body-error' : 'body-help'},aria-errormessage=${#fields.hasErrors('body') ? 'body-error' : null}"
+                          th:classappend="${#fields.hasErrors('body')} ? 'field-error-input'"></textarea>
+                <small id="body-help" class="field-counter"><span id="body-counter">0</span>/10000</small>
+                <span id="body-error" class="field-error" th:if="${#fields.hasErrors('body')}" th:errors="*{body}">Ошибка</span>
+            </div>
+            <div class="field">
+                <label for="tags" th:text="#{topic.form.tags}">Метки</label>
+                <input id="tags" type="text" th:field="*{tags}" maxlength="200" th:placeholder="#{topic.form.tagsPlaceholder}"
+                       th:attr="aria-invalid=${#fields.hasErrors('tags')},aria-describedby=${#fields.hasErrors('tags') ? 'tags-help tags-error' : 'tags-help'},aria-errormessage=${#fields.hasErrors('tags') ? 'tags-error' : null}"
+                       th:classappend="${#fields.hasErrors('tags')} ? 'field-error-input'">
+                <small id="tags-help" class="field-help" th:text="#{topic.form.tagsHelp}">Разделяйте метки запятыми.</small>
+                <span id="tags-error" class="field-error" th:if="${#fields.hasErrors('tags')}" th:errors="*{tags}">Ошибка</span>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button class="button button-coral" type="submit" th:text="#{topic.form.publish}">Опубликовать</button>
+            <a th:href="@{/}" th:text="#{action.cancel}">Отмена</a>
+        </div>
+    </form>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

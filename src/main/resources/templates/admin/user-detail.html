@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ru" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head(${user.username})}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main id="main-content" class="page-shell page-shell-wide">
+    <div th:replace="~{fragments/flash :: flash}"></div>
+    <div class="admin-layout">
+        <aside class="admin-sidebar"><p class="admin-sidebar-title" th:text="#{admin.sidebar}">Управление</p><nav th:attr="aria-label=#{admin.navigation}"><a th:href="@{/admin/categories}" th:text="#{admin.categories}">Категории</a><a class="active" aria-current="page" th:href="@{/admin/users}" th:text="#{admin.users}">Пользователи</a><a th:href="@{/}" th:text="#{nav.forum}">На форум</a></nav></aside>
+        <section aria-labelledby="user-detail-heading">
+            <nav th:attr="aria-label=#{breadcrumbs.label}"><ol class="breadcrumbs"><li><a th:href="@{/admin/users}" th:text="#{admin.users}">Пользователи</a></li><li aria-current="page" th:text="${user.username}">user</li></ol></nav>
+            <header class="page-header"><div><p class="eyebrow" th:text="#{admin.user.eyebrow}">Управление аккаунтом</p><h1 id="user-detail-heading" class="page-title-compact" th:text="${user.username}">username</h1><p class="lead" th:text="${user.email}">mail@example.com</p></div><a class="button" th:href="@{/users/{username}(username=${user.username})}" th:text="#{action.viewProfile}">Открыть профиль</a></header>
+            <div class="content-grid">
+                <div class="content-main">
+                    <form class="form-card" th:action="@{/admin/users/{id}(id=${user.id})}" th:object="${form}" method="post">
+                        <h2 th:text="#{admin.user.access}">Роли и доступ</h2>
+                        <div th:replace="~{fragments/flash :: formErrors(${form})}"></div>
+                        <fieldset class="field" style="border: 0; padding: 0"><legend th:text="#{admin.user.roles}">Роли</legend><div class="stack-small"><label class="checkbox-field"><input type="checkbox" th:field="*{roles}" value="USER"><span th:text="#{role.user}">Пользователь</span></label><label class="checkbox-field"><input type="checkbox" th:field="*{roles}" value="MODERATOR"><span th:text="#{role.moderator}">Модератор</span></label><label class="checkbox-field"><input type="checkbox" th:field="*{roles}" value="ADMIN"><span th:text="#{role.admin}">Администратор</span></label></div></fieldset>
+                        <fieldset class="field" style="border: 0; padding: 0; margin-top: 24px"><legend th:text="#{admin.user.categories}">Категории модератора</legend><p class="field-help" th:text="#{admin.user.categoriesHelp}">Применяется только к роли модератора.</p><div class="stack-small"><label class="checkbox-field" th:each="category : ${categories}"><input type="checkbox" th:field="*{moderatedCategoryIds}" th:value="${category.id}"><span th:text="${category.name}">Категория</span></label></div></fieldset>
+                        <div class="danger-zone" style="margin-top: 28px"><h2 th:text="#{admin.user.blocking}">Блокировка</h2><label class="checkbox-field"><input type="checkbox" th:field="*{blocked}"><span th:text="#{admin.user.blocked}">Запретить публикацию тем и ответов</span></label><div class="field" style="margin-top: 16px"><label for="blockedUntil" th:text="#{admin.user.blockedUntil}">Заблокировать до</label><input id="blockedUntil" type="datetime-local" th:field="*{blockedUntil}" th:attr="aria-invalid=${#fields.hasErrors('blockedUntil')},aria-describedby=${#fields.hasErrors('blockedUntil') ? 'blocked-until-help blocked-until-error' : 'blocked-until-help'},aria-errormessage=${#fields.hasErrors('blockedUntil') ? 'blocked-until-error' : null}" th:classappend="${#fields.hasErrors('blockedUntil')} ? 'field-error-input'"><small id="blocked-until-help" class="field-help" th:text="#{admin.user.blockedUntilHelp}">Оставьте пустым для бессрочной блокировки.</small><span id="blocked-until-error" class="field-error" th:if="${#fields.hasErrors('blockedUntil')}" th:errors="*{blockedUntil}">Ошибка</span></div><div class="field" style="margin-top: 16px"><label for="blockReason" th:text="#{admin.user.reason}">Причина</label><textarea id="blockReason" th:field="*{reason}" maxlength="1000" rows="4" th:attr="aria-invalid=${#fields.hasErrors('reason')},aria-describedby=${#fields.hasErrors('reason') ? 'block-reason-error' : null},aria-errormessage=${#fields.hasErrors('reason') ? 'block-reason-error' : null}" th:classappend="${#fields.hasErrors('reason')} ? 'field-error-input'"></textarea><span id="block-reason-error" class="field-error" th:if="${#fields.hasErrors('reason')}" th:errors="*{reason}">Ошибка</span></div></div>
+                        <div class="form-actions"><button class="button button-coral" type="submit" th:text="#{action.save}">Сохранить</button><a th:href="@{/admin/users}" th:text="#{action.cancel}">Отмена</a></div>
+                    </form>
+                </div>
+                <aside class="content-aside"><section class="panel panel-turquoise"><h2 th:text="#{admin.user.summary}">Сводка</h2><dl class="definition-grid"><dt>ID</dt><dd th:text="${user.id}">1</dd><dt th:text="#{auth.email}">Почта</dt><dd th:text="${user.email}">mail</dd><dt th:text="#{admin.user.registered}">Регистрация</dt><dd><time th:datetime="${user.createdAt}" th:text="${#temporals.format(user.createdAt, 'dd.MM.yyyy HH:mm')}">Дата</time></dd><dt th:text="#{admin.user.verification}">Подтверждение</dt><dd th:text="${user.emailVerified ? #messages.msg('admin.user.verified') : #messages.msg('admin.user.unverified')}">Статус</dd></dl></section></aside>
+            </div>
+        </section>
+    </div>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

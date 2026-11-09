@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ru" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head(${#messages.msg('report.title')})}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main id="main-content" class="page-shell page-shell-narrow">
+    <div th:replace="~{fragments/flash :: flash}"></div>
+    <nav th:attr="aria-label=#{breadcrumbs.label}"><ol class="breadcrumbs"><li><a th:href="@{/}" th:text="#{nav.home}">Главная</a></li><li><a th:href="@{/topics/{id}(id=${topic.id})}" th:text="${topic.title}">Тема</a></li><li aria-current="page" th:text="#{report.title}">Жалоба</li></ol></nav>
+    <header class="page-header"><div><p class="eyebrow" th:text="#{report.eyebrow}">Безопасность сообщества</p><h1 class="page-title-compact" th:text="#{report.title}">Пожаловаться на публикацию</h1><p class="lead" th:text="#{report.subtitle}">Опишите нарушение спокойно и конкретно. Модератор проверит контекст.</p></div></header>
+
+    <div class="panel panel-yellow" style="margin-bottom: 24px">
+        <p class="small muted" style="margin-top: 0" th:text="#{report.publicationBy(${post.authorUsername})}">Публикация пользователя</p>
+        <p style="white-space: pre-wrap" th:text="${#strings.abbreviate(post.body, 500)}">Текст публикации</p>
+    </div>
+
+    <form class="form-card" th:action="@{/reports/new}" th:object="${form}" method="post">
+        <div th:replace="~{fragments/flash :: formErrors(${form})}"></div>
+        <input type="hidden" th:field="*{postId}">
+        <div class="field">
+            <label class="required" for="reason" th:text="#{report.reason}">Причина жалобы</label>
+            <textarea id="reason" th:field="*{reason}" required minlength="10" maxlength="1000" rows="7" data-count-target="report-counter"
+                      th:classappend="${#fields.hasErrors('reason')} ? 'field-error-input'" th:placeholder="#{report.reasonPlaceholder}"></textarea>
+            <small class="field-counter"><span id="report-counter">0</span>/1000</small>
+            <span class="field-error" th:if="${#fields.hasErrors('reason')}" th:errors="*{reason}">Ошибка</span>
+        </div>
+        <div class="form-actions"><button class="button button-coral" type="submit" th:text="#{report.submit}">Отправить жалобу</button><a th:href="@{/posts/{id}(id=${post.id})}" th:text="#{action.cancel}">Отмена</a></div>
+    </form>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

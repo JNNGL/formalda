@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ru" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head(${editing ? #messages.msg('admin.category.edit') : #messages.msg('admin.category.create')})}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main id="main-content" class="page-shell page-shell-wide">
+    <div th:replace="~{fragments/flash :: flash}"></div>
+    <div class="admin-layout">
+        <aside class="admin-sidebar"><p class="admin-sidebar-title" th:text="#{admin.sidebar}">Управление</p><nav th:attr="aria-label=#{admin.navigation}"><a class="active" aria-current="page" th:href="@{/admin/categories}" th:text="#{admin.categories}">Категории</a><a th:href="@{/admin/users}" th:text="#{admin.users}">Пользователи</a><a th:href="@{/}" th:text="#{nav.forum}">На форум</a></nav></aside>
+        <section aria-labelledby="category-form-heading">
+            <nav th:attr="aria-label=#{breadcrumbs.label}"><ol class="breadcrumbs"><li><a th:href="@{/admin/categories}" th:text="#{admin.categories}">Категории</a></li><li aria-current="page" th:text="${editing ? #messages.msg('action.edit') : #messages.msg('action.create')}">Создание</li></ol></nav>
+            <header class="page-header"><div><p class="eyebrow" th:text="#{admin.eyebrow}">Администрирование</p><h1 id="category-form-heading" class="page-title-compact" th:text="${editing ? #messages.msg('admin.category.edit') : #messages.msg('admin.category.create')}">Категория</h1><p class="lead" th:text="#{admin.category.subtitle}">Название и описание видны всем посетителям форума.</p></div></header>
+            <form class="form-card" th:action="${editing ? '/admin/categories/' + categoryId + '/edit' : '/admin/categories/new'}" th:object="${form}" method="post">
+                <div th:replace="~{fragments/flash :: formErrors(${form})}"></div>
+                <div class="stack">
+                    <div class="field"><label class="required" for="category-name" th:text="#{admin.category.name}">Название</label><input id="category-name" type="text" th:field="*{name}" required minlength="2" maxlength="80" th:attr="aria-invalid=${#fields.hasErrors('name')},aria-describedby=${#fields.hasErrors('name') ? 'category-name-error' : null},aria-errormessage=${#fields.hasErrors('name') ? 'category-name-error' : null}" th:classappend="${#fields.hasErrors('name')} ? 'field-error-input'"><span id="category-name-error" class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Ошибка</span></div>
+                    <div class="field"><label class="required" for="category-description" th:text="#{admin.category.description}">Описание</label><textarea id="category-description" th:field="*{description}" required maxlength="500" rows="5" data-count-target="category-description-counter" th:attr="aria-invalid=${#fields.hasErrors('description')},aria-describedby=${#fields.hasErrors('description') ? 'category-description-help category-description-error' : 'category-description-help'},aria-errormessage=${#fields.hasErrors('description') ? 'category-description-error' : null}" th:classappend="${#fields.hasErrors('description')} ? 'field-error-input'"></textarea><small id="category-description-help" class="field-counter"><span id="category-description-counter">0</span>/500</small><span id="category-description-error" class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">Ошибка</span></div>
+                    <div class="field"><label class="required" for="sortOrder" th:text="#{admin.category.sortOrder}">Порядок</label><input id="sortOrder" type="number" th:field="*{sortOrder}" min="0" required th:attr="aria-invalid=${#fields.hasErrors('sortOrder')},aria-describedby=${#fields.hasErrors('sortOrder') ? 'sort-order-help sort-order-error' : 'sort-order-help'},aria-errormessage=${#fields.hasErrors('sortOrder') ? 'sort-order-error' : null}" th:classappend="${#fields.hasErrors('sortOrder')} ? 'field-error-input'"><small id="sort-order-help" class="field-help" th:text="#{admin.category.sortOrderHelp}">Меньшее число показывается раньше.</small><span id="sort-order-error" class="field-error" th:if="${#fields.hasErrors('sortOrder')}" th:errors="*{sortOrder}">Ошибка</span></div>
+                    <label class="checkbox-field"><input type="checkbox" th:field="*{enabled}"><span><strong th:text="#{admin.category.enabled}">Категория включена</strong><small class="field-help" th:text="#{admin.category.enabledHelp}">Отключённая категория скрыта со главной и доступна только для чтения.</small></span></label>
+                </div>
+                <div class="form-actions"><button class="button button-yellow" type="submit" th:text="#{action.save}">Сохранить</button><a th:href="@{/admin/categories}" th:text="#{action.cancel}">Отмена</a></div>
+            </form>
+        </section>
+    </div>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

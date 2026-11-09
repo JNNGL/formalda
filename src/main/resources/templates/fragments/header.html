@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<header class="site-header" th:fragment="header">
+    <a class="skip-link" href="#main-content" th:text="#{nav.skip}">Перейти к содержимому</a>
+    <div class="header-inner">
+        <a class="brand" th:href="@{/}" th:attr="aria-label=#{brand.home}">
+            <span class="brand-mark" aria-hidden="true">F</span>
+            <span>Formalda</span>
+        </a>
+
+        <button class="menu-toggle" type="button" aria-controls="main-navigation" aria-expanded="false"
+                data-menu-toggle>
+            <span aria-hidden="true">☰</span>
+            <span class="sr-only" th:text="#{nav.menu}">Меню</span>
+        </button>
+
+        <nav class="main-navigation" id="main-navigation" aria-label="Основная навигация" th:attr="aria-label=#{nav.primary}">
+            <a th:href="@{/}" th:text="#{nav.categories}">Категории</a>
+            <a th:href="@{/search}" th:text="#{nav.search}">Поиск</a>
+            <a class="nav-mobile-only" sec:authorize="isAnonymous()" th:href="@{/auth/login}" th:text="#{nav.login}">Войти</a>
+            <a sec:authorize="isAuthenticated()" th:href="@{/topics/new}" class="nav-primary" th:text="#{nav.newTopic}">Новая тема</a>
+            <a sec:authorize="hasAnyRole('MODERATOR','ADMIN')" th:href="@{/moderation/reports}" th:text="#{nav.moderation}">Модерация</a>
+            <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/categories}" th:text="#{nav.admin}">Управление</a>
+        </nav>
+
+        <div class="header-actions">
+            <a class="icon-link notification-link" sec:authorize="isAuthenticated()" th:href="@{/me/notifications}"
+               th:attr="aria-label=#{nav.notifications}">
+                <span aria-hidden="true">!</span>
+                <span class="notification-count" th:if="${unreadCount != null and unreadCount > 0}"
+                      th:text="${unreadCount > 99 ? '99+' : unreadCount}">3</span>
+            </a>
+            <a sec:authorize="isAnonymous()" th:href="@{/auth/login}" class="button button-small button-ink" th:text="#{nav.login}">Войти</a>
+            <a sec:authorize="isAnonymous()" th:href="@{/auth/register}" class="button button-small button-yellow" th:text="#{nav.register}">Регистрация</a>
+
+            <details class="user-menu" sec:authorize="isAuthenticated()">
+                <summary th:attr="aria-label=#{nav.profile}">
+                    <span class="avatar avatar-small" aria-hidden="true"
+                          th:text="${currentUser != null ? #strings.substring(currentUser.username, 0, 1).toUpperCase() : 'U'}">U</span>
+                    <span th:text="${currentUser != null ? currentUser.username : #authentication.name}">username</span>
+                </summary>
+                <div class="user-menu-popover">
+                    <a th:href="@{/users/{username}(username=${currentUser != null ? currentUser.username : #authentication.name})}"
+                       th:text="#{nav.profile}">Профиль</a>
+                    <a th:href="@{/me/profile}" th:text="#{profile.settings}">Настройки профиля</a>
+                    <a th:href="@{/me/bookmarks}" th:text="#{nav.bookmarks}">Закладки</a>
+                    <a th:href="@{/me/subscriptions}" th:text="#{nav.subscriptions}">Подписки</a>
+                    <form th:action="@{/auth/logout}" method="post">
+                        <button type="submit" class="link-button" th:text="#{nav.logout}">Выйти</button>
+                    </form>
+                </div>
+            </details>
+
+            <div class="language-switcher" role="group" aria-label="Language" th:attr="aria-label=#{nav.language}">
+                <a th:href="${localeRuUrl}" hreflang="ru" th:classappend="${#locale.language == 'ru'} ? 'active'"
+                   th:attr="aria-current=${#locale.language == 'ru' ? 'true' : null}">RU</a>
+                <a th:href="${localeEnUrl}" hreflang="en" th:classappend="${#locale.language == 'en'} ? 'active'"
+                   th:attr="aria-current=${#locale.language == 'en' ? 'true' : null}">EN</a>
+            </div>
+        </div>
+    </div>
+</header>
+</body>
+</html>

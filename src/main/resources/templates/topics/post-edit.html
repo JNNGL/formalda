@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head(${#messages.msg('post.edit.title')})}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main id="main-content" class="page-shell page-shell-narrow">
+    <div th:replace="~{fragments/flash :: flash}"></div>
+    <nav th:attr="aria-label=#{breadcrumbs.label}">
+        <ol class="breadcrumbs">
+            <li><a th:href="@{/}" th:text="#{nav.home}">Главная</a></li>
+            <li><a th:href="@{/topics/{id}(id=${topicId})}" th:text="#{topic.discussion}">Обсуждение</a></li>
+            <li aria-current="page" th:text="#{action.edit}">Редактирование</li>
+        </ol>
+    </nav>
+    <header class="page-header">
+        <div>
+            <p class="eyebrow" th:text="#{post.edit.eyebrow}">Публикация</p>
+            <h1 class="page-title-compact" th:text="#{post.edit.title}">Редактировать ответ</h1>
+        </div>
+    </header>
+    <form class="form-card" th:action="@{/posts/{id}/edit(id=${postId})}" th:object="${form}" method="post">
+        <div th:replace="~{fragments/flash :: formErrors(${form})}"></div>
+        <div class="field">
+            <label class="required" for="body" th:text="#{post.edit.body}">Текст публикации</label>
+            <textarea id="body" th:field="*{body}" required maxlength="10000" rows="12" data-count-target="post-counter"
+                      th:attr="aria-invalid=${#fields.hasErrors('body')},aria-describedby=${#fields.hasErrors('body') ? 'post-body-help post-body-error' : 'post-body-help'},aria-errormessage=${#fields.hasErrors('body') ? 'post-body-error' : null}"
+                      th:classappend="${#fields.hasErrors('body')} ? 'field-error-input'"></textarea>
+            <small id="post-body-help" class="field-counter"><span id="post-counter">0</span>/10000</small>
+            <span id="post-body-error" class="field-error" th:if="${#fields.hasErrors('body')}" th:errors="*{body}">Ошибка</span>
+        </div>
+        <div class="form-actions">
+            <button class="button button-yellow" type="submit" th:text="#{action.save}">Сохранить</button>
+            <a th:href="@{/posts/{id}(id=${postId})}" th:text="#{action.cancel}">Отмена</a>
+        </div>
+    </form>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

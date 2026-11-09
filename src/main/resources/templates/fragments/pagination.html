@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav th:fragment="pagination(page, baseUrl, querySuffix)" class="pagination"
+     th:if="${page != null and page.totalPages > 1}"
+     th:with="currentPage=${page.number < 0 ? 0 : (page.number >= page.totalPages ? page.totalPages - 1 : page.number)}"
+     th:attr="aria-label=#{pagination.label}">
+    <a class="pagination-link pagination-direction" th:if="${currentPage > 0}"
+       th:href="${baseUrl + '?page=' + (currentPage - 1) + (querySuffix != null ? querySuffix : '')}"
+       rel="prev" th:text="#{pagination.previous}">Назад</a>
+    <span class="pagination-link disabled" th:unless="${currentPage > 0}" th:text="#{pagination.previous}">Назад</span>
+
+    <th:block th:with="startPage=${currentPage > 2 ? currentPage - 2 : 0}, endPage=${currentPage + 2 < page.totalPages ? currentPage + 2 : page.totalPages - 1}">
+        <a class="pagination-link" th:each="pageIndex : ${#numbers.sequence(startPage, endPage)}"
+           th:href="${baseUrl + '?page=' + pageIndex + (querySuffix != null ? querySuffix : '')}"
+           th:text="${pageIndex + 1}"
+           th:classappend="${pageIndex == currentPage} ? 'current'"
+           th:attr="aria-current=${pageIndex == currentPage ? 'page' : null}">1</a>
+    </th:block>
+
+    <a class="pagination-link pagination-direction" th:if="${currentPage + 1 < page.totalPages}"
+       th:href="${baseUrl + '?page=' + (currentPage + 1) + (querySuffix != null ? querySuffix : '')}"
+       rel="next" th:text="#{pagination.next}">Вперёд</a>
+    <span class="pagination-link disabled" th:unless="${currentPage + 1 < page.totalPages}" th:text="#{pagination.next}">Вперёд</span>
+</nav>
+
+<nav th:fragment="namedPagination(page, baseUrl, pageParameter, querySuffix)" class="pagination"
+     th:if="${page != null and page.totalPages > 1}"
+     th:with="currentPage=${page.number < 0 ? 0 : (page.number >= page.totalPages ? page.totalPages - 1 : page.number)}"
+     th:attr="aria-label=#{pagination.label}">
+    <a class="pagination-link pagination-direction" th:if="${currentPage > 0}"
+       th:href="${baseUrl + '?' + pageParameter + '=' + (currentPage - 1) + (querySuffix != null ? querySuffix : '')}"
+       rel="prev" th:text="#{pagination.previous}">Назад</a>
+    <span class="pagination-link disabled" th:unless="${currentPage > 0}" th:text="#{pagination.previous}">Назад</span>
+
+    <th:block th:with="startPage=${currentPage > 2 ? currentPage - 2 : 0}, endPage=${currentPage + 2 < page.totalPages ? currentPage + 2 : page.totalPages - 1}">
+        <a class="pagination-link" th:each="pageIndex : ${#numbers.sequence(startPage, endPage)}"
+           th:href="${baseUrl + '?' + pageParameter + '=' + pageIndex + (querySuffix != null ? querySuffix : '')}"
+           th:text="${pageIndex + 1}"
+           th:classappend="${pageIndex == currentPage} ? 'current'"
+           th:attr="aria-current=${pageIndex == currentPage ? 'page' : null}">1</a>
+    </th:block>
+
+    <a class="pagination-link pagination-direction" th:if="${currentPage + 1 < page.totalPages}"
+       th:href="${baseUrl + '?' + pageParameter + '=' + (currentPage + 1) + (querySuffix != null ? querySuffix : '')}"
+       rel="next" th:text="#{pagination.next}">Вперёд</a>
+    <span class="pagination-link disabled" th:unless="${currentPage + 1 < page.totalPages}" th:text="#{pagination.next}">Вперёд</span>
+</nav>
+</body>
+</html>

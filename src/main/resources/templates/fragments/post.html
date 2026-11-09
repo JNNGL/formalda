@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<article class="post" th:fragment="post(post, topic)" th:id="${'post-' + post.id}">
+    <aside class="post-author">
+        <span class="avatar" aria-hidden="true" th:text="${#strings.substring(post.authorUsername, 0, 1).toUpperCase()}">U</span>
+        <a class="post-author-name" th:href="@{/users/{username}(username=${post.authorUsername})}" th:text="${post.authorUsername}">username</a>
+        <span class="small muted" th:text="#{post.participant}">Участник</span>
+    </aside>
+    <div class="post-body">
+        <header class="post-topline">
+            <div class="post-meta">
+                <time th:datetime="${post.createdAt}" th:text="${#temporals.format(post.createdAt, 'dd.MM.yyyy HH:mm')}">08.11.2026 12:30</time>
+                <span th:if="${post.editedAt != null}">
+                    <span th:text="#{post.edited}">изменено</span>
+                    <time th:datetime="${post.editedAt}" th:text="${#temporals.format(post.editedAt, 'dd.MM.yyyy HH:mm')}">08.11.2026</time>
+                </span>
+                <span class="badge badge-info" th:if="${post.initialPost}" th:text="#{post.topicStarter}">Автор темы</span>
+            </div>
+            <a class="post-anchor" th:href="@{/posts/{id}(id=${post.id})}" th:text="${'#' + post.id}" th:attr="aria-label=#{post.permalink}">#1</a>
+        </header>
+
+        <p class="small panel-turquoise" style="padding: 8px 10px; border: 2px solid var(--ink)"
+           th:if="${post.parentPostId != null}">
+            <span th:text="#{post.replyTo}">Ответ пользователю</span>
+            <strong th:text="${post.parentAuthorUsername}">username</strong>
+            <a th:href="@{/posts/{id}(id=${post.parentPostId})}" th:text="${'#' + post.parentPostId}">#2</a>
+        </p>
+
+        <div class="post-content" th:if="${post.status.name() == 'VISIBLE'}" th:text="${post.body}">Текст публикации</div>
+        <div class="post-content post-deleted" th:if="${post.status.name() == 'DELETED'}" th:text="#{post.deleted}">Публикация удалена автором.</div>
+        <div class="post-content post-hidden" th:if="${post.status.name() == 'HIDDEN'}" th:text="#{post.hidden}">Публикация скрыта модератором.</div>
+
+        <footer class="post-footer" th:if="${post.status.name() == 'VISIBLE'}">
+            <div class="post-actions">
+                <form class="inline-form" sec:authorize="isAuthenticated()"
+                      th:if="${topic.categoryEnabled and topic.status.name() != 'ARCHIVED'}"
+                      th:action="@{/posts/{id}/like(id=${post.id})}" method="post">
+                    <button type="submit" class="link-button" th:text="${post.liked ? #messages.msg('post.unlike') : #messages.msg('post.like')}">Нравится</button>
+                    <span aria-hidden="true"> · </span><span th:text="${post.likeCount}">0</span>
+                </form>
+                <span sec:authorize="isAnonymous()"><span th:text="#{post.likes}">Нравится:</span> <strong th:text="${post.likeCount}">0</strong></span>
+                <span sec:authorize="isAuthenticated()" th:if="${!topic.categoryEnabled or topic.status.name() == 'ARCHIVED'}"><span th:text="#{post.likes}">Нравится:</span> <strong th:text="${post.likeCount}">0</strong></span>
+                <a sec:authorize="isAuthenticated()" th:if="${topic.categoryEnabled and topic.status.name() == 'OPEN' and !post.initialPost}" th:href="@{/posts/{id}(id=${post.id},reply=true)}" th:text="#{post.reply}">Ответить</a>
+                <a sec:authorize="isAuthenticated()"
+                   th:if="${topic.categoryEnabled and topic.status.name() != 'ARCHIVED' and currentUser != null and currentUser.username != post.authorUsername}"
+                   th:href="@{/reports/new(postId=${post.id})}" th:text="#{post.report}">Пожаловаться</a>
+            </div>
+            <div class="post-actions" th:if="${topic.categoryEnabled and topic.status.name() != 'ARCHIVED' and (post.canEdit or post.canDelete)}">
+                <a th:if="${post.canEdit}" th:href="@{/posts/{id}/edit(id=${post.id})}" th:text="#{action.edit}">Изменить</a>
+                <a th:if="${post.canDelete}" class="danger-link" th:href="@{/posts/{id}/delete(id=${post.id})}" th:text="#{action.delete}">Удалить</a>
+            </div>
+        </footer>
+    </div>
+</article>
+</body>
+</html>

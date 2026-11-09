@@ -1,0 +1,15 @@
+.git
+.gitattributes
+.gradle
+build
+bin
+out
+.idea
+.vscode
+*.iml
+*.log
+.env
+.env.*
+!.env.example
+README.md
+compose.yaml

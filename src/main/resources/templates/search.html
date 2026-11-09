@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ru" th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head(${#messages.msg('search.title')})}"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<main id="main-content" class="page-shell">
+    <div th:replace="~{fragments/flash :: flash}"></div>
+    <header class="page-header">
+        <div>
+            <p class="eyebrow" th:text="#{search.eyebrow}">По всему форуму</p>
+            <h1 class="page-title-compact" th:text="#{search.title}">Поиск обсуждений</h1>
+            <p class="lead" th:text="#{search.subtitle}">Ищите по заголовкам и тексту тем.</p>
+        </div>
+    </header>
+
+    <form class="panel panel-yellow" th:action="@{/search}" method="get" role="search">
+        <div class="form-grid">
+            <div class="field">
+                <label class="required" for="search-query" th:text="#{search.label}">Поиск по форуму</label>
+                <input id="search-query" type="search" name="q" th:value="${searchQuery}" minlength="2" maxlength="160"
+                       th:placeholder="#{search.placeholder}" required autofocus>
+            </div>
+            <div class="field">
+                <label for="search-category" th:text="#{search.category}">Категория</label>
+                <select id="search-category" name="categoryId">
+                    <option value="" th:text="#{search.allCategories}">Все категории</option>
+                    <option th:each="item : ${categories}" th:value="${item.id}" th:text="${item.name}"
+                            th:selected="${param.categoryId != null and param.categoryId[0] == item.id.toString()}">Категория</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button class="button button-ink" type="submit" th:text="#{search.submit}">Найти</button>
+            <a th:if="${searchQuery != null and !searchQuery.isBlank()}" th:href="@{/search}" th:text="#{search.clear}">Очистить</a>
+        </div>
+    </form>
+
+    <section style="margin-top: 36px" aria-labelledby="results-heading" th:if="${searchQuery != null and !searchQuery.isBlank()}">
+        <div class="section-heading">
+            <h2 id="results-heading" th:text="#{search.results(${searchQuery})}">Результаты поиска</h2>
+            <span class="badge badge-info" th:if="${topics != null}" th:text="#{search.found(${topics.totalElements})}">Найдено: 4</span>
+        </div>
+        <div class="topic-list" th:if="${topics != null and !topics.isEmpty()}">
+            <article class="topic-row" th:each="topic : ${topics.content}">
+                <div>
+                    <div class="meta-list" style="margin-bottom: 7px">
+                        <span class="badge badge-pinned" th:if="${topic.pinned}" th:text="#{topic.pinned}">Закреплено</span>
+                        <a th:href="@{/categories/{id}(id=${topic.categoryId})}" th:text="${topic.categoryName}">Категория</a>
+                    </div>
+                    <h3><a th:href="@{/topics/{id}(id=${topic.id})}" th:text="${topic.title}">Название темы</a></h3>
+                    <div class="topic-meta">
+                        <span th:text="${topic.authorUsername}">user</span>
+                        <time th:datetime="${topic.lastActivityAt}" th:text="${#temporals.format(topic.lastActivityAt, 'dd.MM.yyyy HH:mm')}">08.11.2026</time>
+                    </div>
+                </div>
+                <div class="topic-stats">
+                    <div class="topic-stat"><strong th:text="${topic.replyCount}">0</strong><span th:text="#{topic.repliesLabel}">ответов</span></div>
+                    <div class="topic-stat"><strong th:text="${topic.likeCount}">0</strong><span th:text="#{topic.likesLabel}">нравится</span></div>
+                </div>
+            </article>
+        </div>
+        <div class="empty-state" th:if="${topics == null or topics.isEmpty()}">
+            <span class="empty-state-mark" aria-hidden="true">?</span>
+            <h2 th:text="#{search.empty}">Ничего не найдено</h2>
+            <p th:text="#{search.emptyHint}">Попробуйте изменить запрос или выбрать другую категорию.</p>
+        </div>
+        <th:block th:with="baseUrl='/search', querySuffix=${'&amp;q=' + #uris.escapeQueryParam(searchQuery) + '&amp;categoryId=' + (selectedCategoryId != null ? selectedCategoryId : '')}">
+            <nav th:replace="~{fragments/pagination :: pagination(${topics}, ${baseUrl}, ${querySuffix})}"></nav>
+        </th:block>
+    </section>
+
+    <section class="empty-state" th:if="${searchQuery == null or searchQuery.isBlank()}" style="margin-top: 36px">
+        <span class="empty-state-mark" aria-hidden="true">⌕</span>
+        <h2 th:text="#{search.start}">Введите запрос</h2>
+        <p th:text="#{search.startHint}">Для поиска достаточно двух символов.</p>
+    </section>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>
